@@ -128,7 +128,7 @@ sub construct_ospf {
 
     foreach my $addr (qw(router_id area_id)) {
 	if ($$fields{"${addr}_str"}) {
-	    $$fields{$addr} = join(".", unpack("C4", $$fields{"${addr}_str"}));
+	    $$fields{$addr} = pack("C4", split(/\./, $$fields{"${addr}_str"}));
 	}
     }
     my $packet = pack("C C n a4 a4 xx n",
@@ -148,7 +148,7 @@ sub consume_hello {
     my %fields;
     @fields{qw(network_mask hellointerval options rtr_pri
 	routerdeadinterval designated_router backup_designated_router)} =
-	unpack("a4 n C C N A4 A4", $hello);
+	unpack("a4 n C C N a4 a4", $hello);
     foreach my $addr (qw(network_mask designated_router
 	backup_designated_router)) {
 	$fields{"${addr}_str"} = join(".", unpack("C4", $fields{$addr}));
@@ -173,9 +173,9 @@ sub construct_hello {
 	    $$fields{$addr} = pack("C4", split(/\./, $$fields{"${addr}_str"}));
 	}
     }
-    my $packet = pack("a4 n C C N A4 A4",
+    my $packet = pack("a4 n C C N a4 a4",
 	@$fields{qw(network_mask hellointerval options rtr_pri
-	    routerdeadinterval designated_router backup_designated_router)});
+	routerdeadinterval designated_router backup_designated_router)});
 
     foreach my $str (@{$$fields{neighbors_str}}) {
 	push @{$$fields{neighbors}}, pack("C4", split(/\./, $str));
@@ -214,7 +214,7 @@ for (;;) {
 
     $ether{src_str} = $mac_address;
     $ip4{src_str} = $ospf_address;
-    $hello{router_id} = $router_id;
+    $ospf{router_id_str} = $router_id;
     $packet = "";
     $packet .= construct_ether(\%ether);
     $packet .= construct_ip4(\%ip4);
