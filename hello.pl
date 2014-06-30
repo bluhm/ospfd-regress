@@ -73,23 +73,22 @@ sub consume_ip4 {
 
 sub construct_ip4 {
     my $fields = shift;
+    my $subpacket = shift // "";
 
-    $$fields{hlv} //= 0x45;
-    if ($$fields{hlen}) {
-	$$fields{hlen} & 3 and die "bad ip4 header length: $$fields{hlen}";
-	$$fields{hlen} < 20
-	    and die "ip4 header length too small: $$fields{hlen}";
-	($$fields{hlen} >> 2) > 0x0f
-	    and die "ip4 header length too big: $$fields{hlen}";
-	$$fields{hlen} != length($$fields{options} // "") + 20
-	    and die "ip4 header length does not match options: $$fields{hlen}";
-	$$fields{hlv} &= 0xf0;
-	$$fields{hlv} |= ($$fields{hlen} >> 2) & 0x0f;
-    }
-    if ($$fields{v}) {
-	$$fields{hlv} &= 0x0f;
-	$$fields{hlv} |= ($$fields{v} << 4) & 0xf0;
-    }
+    $$fields{options} //= "";
+
+    $$fields{hlen} = 20 + length($$fields{options});
+    $$fields{hlen} & 3 and die "bad ip4 header length: $$fields{hlen}";
+    $$fields{hlen} < 20
+	and die "ip4 header length too small: $$fields{hlen}";
+    ($$fields{hlen} >> 2) > 0x0f
+	and die "ip4 header length too big: $$fields{hlen}";
+    $$fields{v} = 4;
+    $$fields{hlv} =
+	(($$fields{v} << 4) & 0xf0) | (($$fields{hlen} >> 2) & 0x0f);
+
+    $$fields{len} = $$fields{hlen} + length($subpacket);
+
     foreach my $addr (qw(src dst)) {
 	$$fields{$addr} = pack("C4", split(/\./, $$fields{"${addr}_str"}));
     }
@@ -97,13 +96,9 @@ sub construct_ip4 {
 	@$fields{qw(hlv tos len id off ttl p src dst)});
     $$fields{sum} = ip_checksum($packet);
     substr($packet, 10, 2, pack("n", $$fields{sum}));
+    $packet .= pack("a*", $$fields{options});
 
-    if ($$fields{options}) {
-	$packet .= pack("a*", $$fields{options});
-	$$fields{options} = substr($$packet, 0, 20 - $$fields{hlen}, "");
-    }
-
-    return $packet;
+    return $packet. $subpacket;
 }
 
 sub consume_ospf {
@@ -125,6 +120,9 @@ sub consume_ospf {
 
 sub construct_ospf {
     my $fields = shift;
+    my $subpacket = shift // "";
+
+    $$fields{packet_length} = 24 + length($subpacket);
 
     foreach my $addr (qw(router_id area_id)) {
 	if ($$fields{"${addr}_str"}) {
@@ -133,11 +131,11 @@ sub construct_ospf {
     }
     my $packet = pack("C C n a4 a4 xx n",
 	@$fields{qw(version type packet_length router_id area_id autype)});
-    $$fields{checksum} = ip_checksum($packet);
+    $$fields{checksum} = ip_checksum($packet. $subpacket);
     substr($packet, 12, 2, pack("n", $$fields{checksum}));
     $packet .= pack("a8", $$fields{authentication});
 
-    return $packet;
+    return $packet. $subpacket;
 }
 
 sub consume_hello {
@@ -167,6 +165,9 @@ sub consume_hello {
 sub construct_hello {
     my $fields = shift;
 
+    $$fields{neighbors_str} //= [];
+    $$fields{neighbors} //= [];
+
     foreach my $addr (qw(network_mask designated_router
 	backup_designated_router)) {
 	if ($$fields{"${addr}_str"}) {
@@ -177,6 +178,9 @@ sub construct_hello {
 	@$fields{qw(network_mask hellointerval options rtr_pri
 	routerdeadinterval designated_router backup_designated_router)});
 
+    if ($$fields{neighbors_str}) {
+	$$fields{neighbors} = [];
+    }
     foreach my $str (@{$$fields{neighbors_str}}) {
 	push @{$$fields{neighbors}}, pack("C4", split(/\./, $str));
     }
@@ -215,11 +219,13 @@ for (;;) {
     $ether{src_str} = $mac_address;
     $ip4{src_str} = $ospf_address;
     $ospf{router_id_str} = $router_id;
+    $hello{backup_designated_router_str} = $router_id;
+    $hello{neighbors_str} = [ "10.188.6.17" ];
     $packet = "";
     $packet .= construct_ether(\%ether);
-    $packet .= construct_ip4(\%ip4);
-    $packet .= construct_ospf(\%ospf);
-    $packet .= construct_hello(\%hello);
+    $packet .= construct_ip4(\%ip4,
+	construct_ospf(\%ospf,
+	construct_hello(\%hello)));
 
     $n = syswrite($tun, $packet);
     defined($n) or die "syswrite failed: $!";
