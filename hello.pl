@@ -6,6 +6,11 @@ use Fcntl;
 use Data::Dumper;
 use YAML;
 
+my $tun_device = 6;
+my $mac_address = "1:2:3:4:5:6";
+my $ospf_address = "10.188.6.18";
+my $router_id = "10.188.6.18";
+
 sub ip_checksum {
     my ($msg) = @_;
     my $chk = 0;
@@ -181,8 +186,8 @@ sub construct_hello {
     return $packet;
 }
 
-sysopen(my $tun, "/dev/tun6", O_RDWR)
-    or die "Open /dev/tun6 failed: $!";
+sysopen(my $tun, "/dev/tun$tun_device", O_RDWR)
+    or die "Open /dev/tun$tun_device failed: $!";
 
 for (;;) {
     my $n = sysread($tun, my $packet, 70000);
@@ -207,8 +212,10 @@ for (;;) {
     }
     my %hello = consume_hello(\$packet);
 
+    $ether{src_str} = $mac_address;
+    $ip4{src_str} = $ospf_address;
+    $hello{router_id} = $router_id;
     $packet = "";
-    $ether{src_str} = "1:2:3:4:5:6";
     $packet .= construct_ether(\%ether);
     $packet .= construct_ip4(\%ip4);
     $packet .= construct_ospf(\%ospf);
