@@ -17,6 +17,7 @@ use warnings;
 
 package Packet;
 use parent 'Exporter';
+use Carp;
 
 our @EXPORT = qw(
     consume_ether
@@ -42,7 +43,7 @@ sub ip_checksum {
 sub consume_ether {
     my $packet = shift;
 
-    length($$packet) >= 14 or die "ether packet too short: ". length($$packet);
+    length($$packet) >= 14 or carp "ether packet too short: ". length($$packet);
     my $ether = substr($$packet, 0, 14, "");
     my %fields;
     @fields{qw(dst src type)} = unpack("a6 a6 n", $ether);
@@ -70,7 +71,7 @@ sub construct_ether {
 sub consume_ip4 {
     my $packet = shift;
 
-    length($$packet) >= 20 or die "ip packet too short: ". length($$packet);
+    length($$packet) >= 20 or carp "ip packet too short: ". length($$packet);
     my $ip4 = substr($$packet, 0, 20, "");
     my %fields;
     @fields{qw(hlv tos len id off ttl p sum src dst)} =
@@ -78,8 +79,8 @@ sub consume_ip4 {
     $fields{hlen} = ($fields{hlv} & 0x0f) << 2;
     $fields{v} = ($fields{hlv} >> 4) & 0x0f;
 
-    $fields{v} == 4 or die "ip version is not 4: $fields{v}";
-    $fields{hlen} >= 20 or die "ip header length too small: $fields{hlen}";
+    $fields{v} == 4 or carp "ip version is not 4: $fields{v}";
+    $fields{hlen} >= 20 or carp "ip header length too small: $fields{hlen}";
     if ($fields{hlen} > 20) {
 	$fields{options} = substr($$packet, 0, 20 - $fields{hlen}, "");
     }
@@ -97,11 +98,11 @@ sub construct_ip4 {
     $$fields{options} //= "";
 
     $$fields{hlen} = 20 + length($$fields{options});
-    $$fields{hlen} & 3 and die "bad ip4 header length: $$fields{hlen}";
+    $$fields{hlen} & 3 and carp "bad ip4 header length: $$fields{hlen}";
     $$fields{hlen} < 20
-	and die "ip4 header length too small: $$fields{hlen}";
+	and carp "ip4 header length too small: $$fields{hlen}";
     ($$fields{hlen} >> 2) > 0x0f
-	and die "ip4 header length too big: $$fields{hlen}";
+	and carp "ip4 header length too big: $$fields{hlen}";
     $$fields{v} = 4;
     $$fields{hlv} =
 	(($$fields{v} << 4) & 0xf0) | (($$fields{hlen} >> 2) & 0x0f);
@@ -123,13 +124,13 @@ sub construct_ip4 {
 sub consume_ospf {
     my $packet = shift;
 
-    length($$packet) >= 24 or die "ospf packet too short: ". length($$packet);
+    length($$packet) >= 24 or carp "ospf packet too short: ". length($$packet);
     my $ospf = substr($$packet, 0, 24, "");
     my %fields;
     @fields{qw(version type packet_length router_id area_id checksum autype
 	authentication)} =
 	unpack("C C n a4 a4 n n a8", $ospf);
-    $fields{version} == 2 or die "ospf version is not 2: $fields{v}";
+    $fields{version} == 2 or carp "ospf version is not 2: $fields{v}";
     foreach my $addr (qw(router_id area_id)) {
 	$fields{"${addr}_str"} = join(".", unpack("C4", $fields{$addr}));
     }
@@ -160,7 +161,7 @@ sub construct_ospf {
 sub consume_hello {
     my $packet = shift;
 
-    length($$packet) >= 20 or die "hello packet too short: ". length($$packet);
+    length($$packet) >= 20 or carp "hello packet too short: ". length($$packet);
     my $hello = substr($$packet, 0, 20, "");
     my %fields;
     @fields{qw(network_mask hellointerval options rtr_pri
@@ -170,7 +171,7 @@ sub consume_hello {
 	backup_designated_router)) {
 	$fields{"${addr}_str"} = join(".", unpack("C4", $fields{$addr}));
     }
-    length($$packet) % 4 and die "bad neighbor length: ". length($$packet);
+    length($$packet) % 4 and carp "bad neighbor length: ". length($$packet);
     my $n = length($$packet) / 4;
     $fields{neighbors} = [unpack("a4" x $n, $$packet)];
     $$packet = "";
