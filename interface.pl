@@ -34,7 +34,9 @@ my $router_id = "10.188.6.18";
 my $area_id = "10.188.0.0";
 my $hello_interval = 2;
 
-my $cv = AnyEvent->condvar;
+my $check;
+my $wait;
+my $cv;
 
 sysopen(my $tun, $tun_device, O_RDWR)
     or die "Open $tun_device failed: $!";
@@ -112,10 +114,7 @@ sub interface_state {
     return \%state;
 }
 
-my %router_id2interface_state = (
-    $router_id => interface_state($router_id),
-);
-
+my $is = interface_state($router_id);
 
 $handle->on_read(sub {
     my %ether = consume_ether(\$handle->{rbuf});
@@ -130,57 +129,106 @@ $handle->on_read(sub {
     }
     my %ospf = consume_ospf(\$handle->{rbuf});
     unless ($ospf{type} == 1) {
-	warn "ospt type is not hello";
+	warn "ospf type is not hello";
 	return;
     }
     my %hello = consume_hello(\$handle->{rbuf});
     $handle->{rbuf} = "";  # just to be sure, packets must not cumulate
 
-    foreach my $id (sort keys %router_id2interface_state) {
-	my $is = $router_id2interface_state{$id};
-	if (grep { $_ eq $id } @{$hello{neighbors_str}}) {
-	    $is->{bdr} = "10.188.6.17";
-	    print "see $id in hello of $ospf{router_id_str}\n";
-	} else {
-	    print "no $id in hello of $ospf{router_id_str}\n";
+    my $compare = sub {
+	my $expect = shift;
+	if ($expect->{dr}) {
+	    $hello{designated_router_str} eq $expect->{dr}
+		or return "dr is $hello{designated_router_str}: ".
+		    "expected $expect->{dr}";
 	}
+	if ($expect->{bdr}) {
+	    $hello{backup_designated_router_str} eq $expect->{bdr}
+		or return "bdr is $hello{backup_designated_router_str}: ".
+		    "expected $expect->{bdr}";
+	}
+	if ($expect->{nbrs}) {
+	    my @neighbors = sort @{$hello{neighbors_str} || []};
+	    my @nbrs = @{$expect->{nbrs}};
+	    "@neighbors" eq "@nbrs"
+		or return "nbrs [@neighbors]: expected [@nbrs]";
+	}
+	return "";
+    };
+
+    my $error = $compare->($check);
+    return $cv->croak("check: $error") if $error;
+    print "check successful\n";
+
+    my $reason;
+    if ($wait) {
+	$reason = $compare->($wait);
+    }
+    if ($reason) {
+	print "wait because of: $reason\n";
+    } else {
+	$cv->send();
     }
 });
 
-$cv->recv;
+my @tasks = (
+    {
+	name => "hello mit dr bdr 0.0.0.0 empfangen, ".
+	    "10.188.6.18 als neighbor eintragen",
+	check => {
+	    dr  => "0.0.0.0",
+	    bdr => "0.0.0.0",
+	    nbrs => [],
+	},
+	action => sub {
+	    $is->{state}{nbrs} = [ "10.188.6.18" ];
+	},
+    },
+    {
+	name => "auf neighbor 10.188.6.18 warten",
+	check => {
+	    dr  => "0.0.0.0",
+	    bdr => "0.0.0.0",
+	},
+	wait => {
+	    nbrs => [ "10.188.6.18" ],
+	}
+    },
+);
+
+foreach my $task (@tasks) {
+    print "Task: $task->{name}\n";
+    $check = $task->{check};
+    $wait = $task->{wait};
+    $cv = AnyEvent->condvar;
+    $cv->recv;
+    my $action = $task->{action};
+    $action->() if $action;
+}
 
 print "Terminating\n"
 
 __END__
 
-- pruefen, dass hello mit dr bdr 0.0.0.0 und keine neigbors
+- pruefen, dass hello mit dr bdr 0.0.0.0 und keine neighbors
 - hello mit dr bdr 0.0.0.0 senden, in als neighbor eintragen
-- pruefen, dass hello mit dr bdr 0.0.0.0 und uns als neigbors
+- pruefen, dass hello mit dr bdr 0.0.0.0 und uns als neighbors
 - warten bis WaitTimer abgelaufen ist
 - pruefen dass dr 10.188.6.17 ist
 
 @tasks = [
     {
-	check => hello mit dr bdr 0.0.0.0 und keine neigbors
+	check => hello mit dr bdr 0.0.0.0 und keine neighbors
 	action => hello mit dr bdr 0.0.0.0 senden, in als neighbor eintragen
     },
     {
 	check => hello mit dr bdr 0.0.0.0
-	wait => uns als neigbors
+	wait => uns als neighbors
 	action => warten bis WaitTimer abgelaufen ist
     },
     {
-	check => pruefen dass bdr 0.0.0.0 und uns als neigbors
+	check => pruefen dass bdr 0.0.0.0 und uns als neighbors
 	wait => pruefen dass dr 10.188.6.17 ist
 	action => Test Pass
     }
 ];
-
-while (@tasks) {
-    tasks[0]{check}() or die;
-    if (!tasks[0]{wait} || tasks[0]{wait}()) {
-	tasks[0]{action}();
-	shift @task;
-    }
-}
-
