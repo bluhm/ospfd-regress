@@ -59,7 +59,7 @@ END {
 sub new {
 	my $class = shift;
 	my $self = { @_ };
-	$self->{down} ||= "terminating";
+	$self->{down} ||= "Shutdown";
 	$self->{func} && ref($self->{func}) eq 'CODE'
 	    or croak "$class func not given";
 	$self->{logfile}
@@ -139,7 +139,7 @@ sub loggrep {
 
 	do {
 		my($kid, $status, $code) = $self->wait(WNOHANG);
-		if ($kid > 0 && $status != 0 && !$self->{conftest}) {
+		if ($kid > 0 && $status != 0 && !$self->{configtest}) {
 			# child terminated with failure
 			die ref($self), " child status: $status $code";
 		}
@@ -173,6 +173,7 @@ sub up {
 sub down {
 	my $self = shift;
 	my $timeout = shift || 30;
+	return $self if ($self->{configtest});
 	$self->loggrep(qr/$self->{down}/, $timeout)
 	    or croak ref($self), " no $self->{down} in $self->{logfile} ".
 		"after $timeout seconds";

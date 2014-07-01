@@ -25,11 +25,17 @@ sub new {
 	my $class = shift;
 	my %args = @_;
 	$args{up} ||= "Started";
+	$args{down} ||= "terminating";
 	$args{func} = sub { Carp::confess "$class func may not be called" };
 	$args{conffile} ||= "ospfd.conf";
 	$args{logfile} ||= "ospfd.log";
+	my @sudo = $ENV{SUDO} ? $ENV{SUDO} : ();
 	my $self = Proc::new($class, %args);
 	# generate ospfd.conf from config keys in %args
+	if (-e $self->{conffile}) {
+		my @cmd = (@sudo, "rm", $self->{conffile});
+		system(@cmd) == 0 or die "system(@cmd) failed";
+	}
 	open(my $fh, '>', $self->{conffile})
 	    or die ref($self), " conf file $self->{conffile} create failed: $!";
 	my %global_conf = %{$args{conf}{global}};
@@ -51,7 +57,6 @@ sub new {
 	}
 	close $fh;
 	chmod(0600, $self->{conffile});
-	my @sudo = $ENV{SUDO} ? $ENV{SUDO} : ();
 	my @cmd = (@sudo, "chown", "root:wheel", $self->{conffile});
 	system(@cmd) == 0 or die "system(@cmd) failed";
 
