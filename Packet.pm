@@ -56,6 +56,7 @@ sub consume_ether {
 
 sub construct_ether {
     my $fields = shift;
+    my $subpacket = shift // "";
 
     foreach my $addr (qw(src dst)) {
 	$$fields{$addr} = 
@@ -63,7 +64,7 @@ sub construct_ether {
     }
     my $packet = pack("a6 a6 n", @$fields{qw(dst src type)});
 
-    return $packet;
+    return $packet. $subpacket;
 }
 
 sub consume_ip4 {
