@@ -194,6 +194,16 @@ my @tasks = (
 	    nbrs => [ "10.188.6.18" ],
 	}
     },
+    {
+	name => "warten dass dr 10.188.6.17 ist",
+	check => {
+	    bdr => "0.0.0.0",
+	    nbrs => [ "10.188.6.18" ],
+	},
+	wait => {
+	    dr  => "10.188.6.17",
+	}
+    },
 );
 
 foreach my $task (@tasks) {
