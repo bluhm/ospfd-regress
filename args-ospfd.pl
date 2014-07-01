@@ -10,7 +10,7 @@ our %args = (
 	    },
 	    areas => {
 		'51.0.0.0' => {
-		    'lo0:127.0.0.1' => {
+		    "$ENV{TUNDEV}:$ENV{TUNIP}" => {
 			'metric' => '15',
 		    },
 		},
