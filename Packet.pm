@@ -143,6 +143,7 @@ sub construct_ospf {
     my $subpacket = shift // "";
 
     $$fields{packet_length} = 24 + length($subpacket);
+    $$fields{authentication} = "" if $$fields{autype} == 0;
 
     foreach my $addr (qw(router_id area_id)) {
 	if ($$fields{"${addr}_str"}) {
