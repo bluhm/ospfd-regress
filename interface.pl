@@ -98,11 +98,11 @@ sub interface_state {
 		dst_str => "224.0.0.5",     # all ospf router multicast
 	    );
 	    my %ospf = (
-		version   => 2,         # ospf v2
-		type	  => 1,         # hello
-		router_id => $id,
-		area_id   => $area_id,
-		autype    => 0,         # no authentication
+		version       => 2,         # ospf v2
+		type	      => 1,         # hello
+		router_id_str => $id,
+		area_id_str   => $area_id,
+		autype        => 0,         # no authentication
 	    );
 	    my %hello = (
 		network_mask_str             => "255.255.255.0",
