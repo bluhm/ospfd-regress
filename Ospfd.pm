@@ -50,6 +50,10 @@ sub new {
 		print $fh "}\n";
 	}
 	close $fh;
+	chmod(0600, $self->{conffile});
+	my @sudo = $ENV{SUDO} ? $ENV{SUDO} : ();
+	my @cmd = (@sudo, "chown", "root:wheel", $self->{conffile});
+	system(@cmd) == 0 or die "system(@cmd) failed";
 
 	return $self;
 }
