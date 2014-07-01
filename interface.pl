@@ -89,7 +89,7 @@ sub interface_state {
 	    my %ip4 = (
 		v       => 4,               # ipv4
 		hlen    => 20,
-		tos     => 0,
+		tos     => 0xc0,
 		id      => $hello_count++,  # increment for debugging
 		off     => 0,               # no fragment
 		ttl     => 1,               # only for direct connected
@@ -107,12 +107,12 @@ sub interface_state {
 	    my %hello = (
 		network_mask_str             => "255.255.255.0",
 		hellointerval                => $hello_interval,
-		options                      => 0,
+		options                      => 0x02,
 		rtr_pri		             => 1,
 		routerdeadinterval           => 4 * $hello_interval,
-		designated_router_str        => "0.0.0.0",
+		designated_router_str        => "10.188.6.17",
 		backup_designated_router_str => "0.0.0.0",
-		neighbors_str                => [],
+		neighbors_str                => [ "10.188.6.17" ],
 	    );
 	    $handle->push_write(
 		construct_ether(\%ether,
