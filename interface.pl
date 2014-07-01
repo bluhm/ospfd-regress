@@ -52,32 +52,18 @@ my $handle; $handle = AnyEvent::Handle->new(
 	$handle->destroy();
 	undef $handle;
     },
-    on_read => sub {
-	my %ether = consume_ether(\$handle->{rbuf});
-	unless ($ether{type} == 0x0800) {
-	    warn "ether type is not ip4";
-	    return;
-	}
-	my %ip4 = consume_ip4(\$handle->{rbuf});
-	unless ($ip4{p} == 89) {
-	    warn "ip4 proto is not ospf";
-	    return;
-	}
-	my %ospf = consume_ospf(\$handle->{rbuf});
-	unless ($ospf{type} == 1) {
-	    warn "ospt type is not hello";
-	    return;
-	}
-	my %hello = consume_hello(\$handle->{rbuf});
-	$handle->{rbuf} = "";  # just to be sure, packets must not cumulate
-    },
 );
 
 sub interface_state {
     my ($id) = @_;
 
+    my %state = (
+	dr  => "0.0.0.0",
+	bdr => "0.0.0.0",
+    );
+
     my $hello_count = 0;
-    my $t = AnyEvent->timer(
+    $state{timer} = AnyEvent->timer(
 	after => 1,
 	interval => $hello_interval,
 	cb => sub {
@@ -110,8 +96,8 @@ sub interface_state {
 		options                      => 0x02,
 		rtr_pri		             => 1,
 		routerdeadinterval           => 4 * $hello_interval,
-		designated_router_str        => "10.188.6.17",
-		backup_designated_router_str => "0.0.0.0",
+		designated_router_str        => $state{dr},
+		backup_designated_router_str => $state{bdr},
 		neighbors_str                => [ "10.188.6.17" ],
 	    );
 	    $handle->push_write(
@@ -123,11 +109,78 @@ sub interface_state {
 	},
     );
 
-    return $t;
+    return \%state;
 }
 
+my %router_id2interface_state = (
+    $router_id => interface_state($router_id),
+);
 
-my $is1 = interface_state($router_id);
+
+$handle->on_read(sub {
+    my %ether = consume_ether(\$handle->{rbuf});
+    unless ($ether{type} == 0x0800) {
+	warn "ether type is not ip4";
+	return;
+    }
+    my %ip4 = consume_ip4(\$handle->{rbuf});
+    unless ($ip4{p} == 89) {
+	warn "ip4 proto is not ospf";
+	return;
+    }
+    my %ospf = consume_ospf(\$handle->{rbuf});
+    unless ($ospf{type} == 1) {
+	warn "ospt type is not hello";
+	return;
+    }
+    my %hello = consume_hello(\$handle->{rbuf});
+    $handle->{rbuf} = "";  # just to be sure, packets must not cumulate
+
+    foreach my $id (sort keys %router_id2interface_state) {
+	my $is = $router_id2interface_state{$id};
+	if (grep { $_ eq $id } @{$hello{neighbors_str}}) {
+	    $is->{bdr} = "10.188.6.17";
+	    print "see $id in hello of $ospf{router_id_str}\n";
+	} else {
+	    print "no $id in hello of $ospf{router_id_str}\n";
+	}
+    }
+});
+
 $cv->recv;
 
 print "Terminating\n"
+
+__END__
+
+- pruefen, dass hello mit dr bdr 0.0.0.0 und keine neigbors
+- hello mit dr bdr 0.0.0.0 senden, in als neighbor eintragen
+- pruefen, dass hello mit dr bdr 0.0.0.0 und uns als neigbors
+- warten bis WaitTimer abgelaufen ist
+- pruefen dass dr 10.188.6.17 ist
+
+@tasks = [
+    {
+	check => hello mit dr bdr 0.0.0.0 und keine neigbors
+	action => hello mit dr bdr 0.0.0.0 senden, in als neighbor eintragen
+    },
+    {
+	check => hello mit dr bdr 0.0.0.0
+	wait => uns als neigbors
+	action => warten bis WaitTimer abgelaufen ist
+    },
+    {
+	check => pruefen dass bdr 0.0.0.0 und uns als neigbors
+	wait => pruefen dass dr 10.188.6.17 ist
+	action => Test Pass
+    }
+];
+
+while (@tasks) {
+    tasks[0]{check}() or die;
+    if (!tasks[0]{wait} || tasks[0]{wait}()) {
+	tasks[0]{action}();
+	shift @task;
+    }
+}
+
