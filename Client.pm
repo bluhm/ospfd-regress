@@ -41,32 +41,28 @@ my $t_router_id = "10.188.6.18";
 # Parameters for ospfd
 my $o_router_id = $ENV{TUNIP} || "10.188.6.17";
 
-# XXX move to the right place
+my $handle; 
 my $check;
 my $wait;
 my $cv;
 my $is;
 
-
 sub handle_arp {
-    my $rbuf = shift;
-    my %arp = consume_arp($rbuf);
+    my %arp = consume_arp(\$handle->{rbuf});
 }
 
 sub handle_ip4 {
-    my $rbuf = shift;
-    my %ip4 = consume_ip4($rbuf);
+    my %ip4 = consume_ip4(\$handle->{rbuf});
     unless ($ip4{p} == 89) {
 	warn "ip4 proto is not ospf";
 	return;
     }
-    my %ospf = consume_ospf($rbuf);
+    my %ospf = consume_ospf(\$handle->{rbuf});
     unless ($ospf{type} == 1) {
 	warn "ospf type is not hello";
 	return;
     }
-    my %hello = consume_hello($rbuf);
-    $rbuf = "";  # just to be sure, packets must not cumulate
+    my %hello = consume_hello(\$handle->{rbuf});
 
     my $compare = sub {
 	my $expect = shift;
@@ -169,37 +165,6 @@ sub interface_state {
 sub runtest {
     my $self = shift;
     my @tasks = @{$self->{tasks}};
-    (my $tun_number = $tun_device) =~ s/\D*//;
-    my $tun = opentun($tun_number);
-
-    my $handle; $handle = AnyEvent::Handle->new(
-	fh => $tun,
-	read_size => 70000,  # little more then max ip size
-	on_error => sub {
-	    $cv->croak("error on $tun_device: $!");
-	    $handle->destroy();
-	    undef $handle;
-	},
-	on_eof => sub {
-	    $cv->croak("end-of-file on $tun_device: $!");
-	    $handle->destroy();
-	    undef $handle;
-	},
-    );
-
-    $is = interface_state($handle, $t_router_id);
-
-    $handle->on_read(sub {
-	my %ether = consume_ether(\$handle->{rbuf});
-	if ($ether{type} == 0x0800) {
-	    handle_ip4(\$handle->{rbuf});
-	} elsif ($ether{type} == 0x0806) {
-	    handle_arp(\$handle->{rbuf});
-	} else {
-	    warn "ether type is not supported: $ether{type_hex}";
-	}
-    });
-
 
     $| = 1;
 
@@ -234,9 +199,37 @@ sub new {
     return $self;
 }
 
-# TODO delete it if we don't need it
 sub child {
-    my $self = shift;
+    (my $tun_number = $tun_device) =~ s/\D*//;
+    my $tun = opentun($tun_number);
+
+    $handle = AnyEvent::Handle->new(
+	fh => $tun,
+	read_size => 70000,  # little more then max ip size
+	on_error => sub {
+	    $cv->croak("error on $tun_device: $!");
+	    $handle->destroy();
+	    undef $handle;
+	},
+	on_eof => sub {
+	    $cv->croak("end-of-file on $tun_device: $!");
+	    $handle->destroy();
+	    undef $handle;
+	},
+    	on_read => sub {
+	    my %ether = consume_ether(\$handle->{rbuf});
+	    if ($ether{type} == 0x0800) {
+		handle_ip4(\$handle->{rbuf});
+	    } elsif ($ether{type} == 0x0806) {
+		handle_arp(\$handle->{rbuf});
+	    } else {
+		warn "ether type is not supported: $ether{type_hex}";
+	    }
+	    $handle->{rbuf} = "";  # packets must not cumulate
+	},
+    );
+
+    $is = interface_state($handle, $t_router_id);
 }
 
 1;
