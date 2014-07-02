@@ -219,9 +219,9 @@ sub runtest {
 	$cv->recv;
 	my $action = $task->{action};
 	$action->() if $action;
-}
+    }
 
-print "Terminating\n"
+    print "Terminating\n"
 }
 
 sub new {
