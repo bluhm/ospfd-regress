@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 # Copyright (c) 2010-2014 Alexander Bluhm <bluhm@openbsd.org>
 # Copyright (c) 2014 Florian Riehm <mail@friehm.de>
 #
@@ -18,36 +16,29 @@
 use strict;
 use warnings;
 
-use Ospfd;
-use Client;
+package Client;
+use parent 'Proc';
+use Carp;
 
-sub usage {
-	die "usage: ospf.pl [test-args.pl]\n";
+# TODO interface.pl must be a parameter
+sub perl_client {
+	my @cmd=("perl", "interface.pl");
+	exec(@cmd) or die "exec @cmd failed: $!";
 }
 
-my $test;
-our %args;
-if (@ARGV and -f $ARGV[-1]) {
-	$test = pop;
-	do $test
-	    or die "Do test file $test failed: ", $@ || $!;
+sub new {
+	my ($class, $client, %args) = @_;
+	$args{logfile} ||= "client.log";
+	$args{up} = "Starting test client";
+	$args{down} = "Terminating";
+	$args{func} = \&perl_client;
+	my $self = Proc::new($class, %args);
+	return $self;
 }
-@ARGV == 0 or usage();
 
-my $o = Ospfd->new(
-    %{$args{ospfd}},
-    testfile            => $test,
-);
-
-$o->run;
-$o->up;
-if ($args{client}) {
-	my $c = Client->new(
-	    $args{client},
-	    %{$args{tasks}},
-	);
-	$c->run;
-	$c->down;
+# TODO delete it if we don't need it
+sub child {
+	my $self = shift;
 }
-$o->kill_child;
-$o->down;
+
+1;

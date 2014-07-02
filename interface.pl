@@ -212,6 +212,8 @@ my @tasks = (
     },
 );
 
+print "Starting test client\n";
+
 foreach my $task (@tasks) {
     print "Task: $task->{name}\n";
     $check = $task->{check};
