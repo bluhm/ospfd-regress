@@ -223,6 +223,8 @@ my @tasks = (
     },
 );
 
+$| = 1;
+
 foreach my $task (@tasks) {
     print "Task: $task->{name}\n";
     $check = $task->{check};
