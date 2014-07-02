@@ -28,7 +28,7 @@ use AnyEvent::Strict;
 use Packet;
 use Tun 'opentun';
 
-my $tun_device = $ENV{TUNDEV} ? "/dev/$ENV{TUNDEV}" : "/dev/tun6";
+my $tun_device = $ENV{TUNDEV} ? "/dev/$ENV{TUNDEV}" : "/dev/tun5";
 my $area_id = "10.188.0.0";
 my $hello_interval = 2;
 # Parameters for test client
@@ -211,8 +211,6 @@ my @tasks = (
 	timeout => 11,  # dead interval + hello interval + 1 second
     },
 );
-
-print "Starting test client\n";
 
 foreach my $task (@tasks) {
     print "Task: $task->{name}\n";
