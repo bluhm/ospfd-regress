@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 # Copyright (c) 2014 Alexander Bluhm <bluhm@openbsd.org>
 #
 # Permission to use, copy, modify, and distribute this software for any
@@ -16,17 +14,12 @@
 
 use strict;
 use warnings;
-use Tun 'opentun';
 
-my $tun = opentun(6)
-    or die "Open tun device 6 failed: $!";
+package PassFd;
+use parent 'Exporter';
+our @EXPORT_OK = qw(sendfd recvfd);
 
-for (;;) {
-    my $n = sysread($tun, my $buf, 70000);
-    defined($n) or die "sysread failed: $!";
-    $n or last;
-    print "Read $n bytes\n";
-    print unpack("H*", $buf), "\n";
-}
+require XSLoader;
+XSLoader::load('PassFd');
 
-print "Terminating\n"
+1;

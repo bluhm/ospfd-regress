@@ -26,6 +26,7 @@ use AnyEvent::Handle;
 use AnyEvent::Strict;
 
 use Packet;
+use Tun 'opentun';
 
 my $tun_device = "/dev/tun6";
 my $mac_address = "1:2:3:4:5:6";
@@ -34,8 +35,8 @@ my $router_id = "10.188.6.18";
 
 my $cv = AnyEvent->condvar;
 
-sysopen(my $tun, $tun_device, O_RDWR)
-    or die "Open $tun_device failed: $!";
+(my $tun_number = $tun_device) =~ s/\D*//;
+my $tun = opentun($tun_number);
 
 my $handle; $handle = AnyEvent::Handle->new(
     fh => $tun,

@@ -20,7 +20,7 @@
 
 #include <sys/socket.h>
 
-MODULE = FdPass	PACKAGE = FdPass
+MODULE = PassFd	PACKAGE = PassFd
 
 SV *
 sendfd(PerlIO *so, PerlIO *fh)
@@ -55,7 +55,7 @@ sendfd(PerlIO *so, PerlIO *fh)
 PerlIO *
 recvfd(PerlIO *so)
     PREINIT:
-	PerlIO		*fh;
+	PerlIO		*fh = NULL;
 	int		 s, fd;
 	struct msghdr	 msg;
 	struct cmsghdr	*cmsg;
@@ -87,6 +87,10 @@ recvfd(PerlIO *so)
 			RETVAL = fh;
 			break;
 		}
+	}
+	if (fh == NULL) {
+		errno = ESRCH;
+		XSRETURN_UNDEF;
 	}
     OUTPUT:
 	RETVAL

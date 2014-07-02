@@ -38,9 +38,9 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
-	int 		 fd, tun;
-	char 		 dev[FILENAME_MAX];
-	const char 	*errstr;
+	int		 fd, tun;
+	char		 dev[FILENAME_MAX];
+	const char	*errstr;
 	struct msghdr	 msg;
 	struct cmsghdr	*cmsg;
 	union {

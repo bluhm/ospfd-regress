@@ -26,6 +26,7 @@ use AnyEvent::Handle;
 use AnyEvent::Strict;
 
 use Packet;
+use Tun 'opentun';
 
 my $tun_device = "/dev/$ENV{TUNDEV}" || "/dev/tun6";
 my $area_id = "10.188.0.0";
@@ -41,8 +42,8 @@ my $check;
 my $wait;
 my $cv;
 
-sysopen(my $tun, $tun_device, O_RDWR)
-    or die "Open $tun_device failed: $!";
+(my $tun_number = $tun_device) =~ s/\D*//;
+my $tun = opentun($tun_number);
 
 my $handle; $handle = AnyEvent::Handle->new(
     fh => $tun,
