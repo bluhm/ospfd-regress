@@ -43,7 +43,8 @@ sub ip_checksum {
 sub consume_ether {
     my $packet = shift;
 
-    length($$packet) >= 14 or croak "ether packet too short: ". length($$packet);
+    length($$packet) >= 14
+	or croak "ether packet too short: ". length($$packet);
     my $ether = substr($$packet, 0, 14, "");
     my %fields;
     @fields{qw(dst src type)} = unpack("a6 a6 n", $ether);
@@ -60,7 +61,7 @@ sub construct_ether {
     my $subpacket = shift // "";
 
     foreach my $addr (qw(src dst)) {
-	$$fields{$addr} = 
+	$$fields{$addr} =
 	    pack("C6", map { hex $_ } split(/:/, $$fields{"${addr}_str"}));
     }
     my $packet = pack("a6 a6 n", @$fields{qw(dst src type)});
@@ -162,7 +163,8 @@ sub construct_ospf {
 sub consume_hello {
     my $packet = shift;
 
-    length($$packet) >= 20 or croak "hello packet too short: ". length($$packet);
+    length($$packet) >= 20
+	or croak "hello packet too short: ". length($$packet);
     my $hello = substr($$packet, 0, 20, "");
     my %fields;
     @fields{qw(network_mask hellointerval options rtr_pri

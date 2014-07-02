@@ -48,7 +48,7 @@ sub new {
 		foreach my $if (keys %{${area_conf}{$area}}) {
 			print $fh "\tinterface $if {\n";
 			foreach my $if_opt (keys %{${area_conf}{$area}{$if}}) {
-			  	print $fh "\t\t$if_opt "
+				print $fh "\t\t$if_opt "
 				    . "$area_conf{$area}{$if}{$if_opt}\n";
 			}
 			print $fh "\t}\n";
