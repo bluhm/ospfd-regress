@@ -70,7 +70,7 @@ sub interface_state {
 
     my $hello_count = 0;
     $state{timer} = AnyEvent->timer(
-	after => 1,
+	after => 3,
 	interval => $hello_interval,
 	cb => sub {
 	    my %ether = (
