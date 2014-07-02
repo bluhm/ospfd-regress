@@ -129,6 +129,7 @@ $handle->on_read(sub {
     } else {
 	warn "ether type is not supported: $ether{type_hex}";
     }
+    $handle->{rbuf} = "";  # packets must not cumulate
 });
 
 sub handle_arp {
@@ -159,7 +160,6 @@ sub handle_ip4 {
 	return;
     }
     my %hello = consume_hello(\$handle->{rbuf});
-    $handle->{rbuf} = "";  # just to be sure, packets must not cumulate
 
     my $compare = sub {
 	my $expect = shift;
