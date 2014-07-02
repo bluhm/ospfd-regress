@@ -129,10 +129,23 @@ $handle->on_read(sub {
     } else {
 	warn "ether type is not supported: $ether{type_hex}";
     }
+    $handle->{rbuf} = "";  # packets must not cumulate
 });
 
 sub handle_arp {
     my %arp = consume_arp(\$handle->{rbuf});
+    my %ether = (
+	src_str => $t_mac_address,
+	dst_str => $arp{sha_str},
+	type    => 0x0806,
+    );
+    $arp{op} = 2;
+    @arp{qw(sha_str spa_str tha_str tpa_str)} =
+	($t_mac_address, @arp{qw(tpa_str sha_str spa_str)});
+    $handle->push_write(
+	construct_ether(\%ether,
+	construct_arp(\%arp))
+    );
 }
 
 sub handle_ip4 {
@@ -147,7 +160,6 @@ sub handle_ip4 {
 	return;
     }
     my %hello = consume_hello(\$handle->{rbuf});
-    $handle->{rbuf} = "";  # just to be sure, packets must not cumulate
 
     my $compare = sub {
 	my $expect = shift;
