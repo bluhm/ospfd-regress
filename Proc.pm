@@ -95,9 +95,9 @@ sub run {
 	};
 	open(STDERR, '>&', $self->{log})
 	    or die ref($self), " dup STDERR failed: $!";
-	close($writer);
 	open(STDOUT, '>&', $self->{log})
 	    or die ref($self), " dup STDOUT failed: $!";
+	close($writer);
 	open(STDIN, '<&', $reader)
 	    or die ref($self), " dup STDIN failed: $!";
 	close($reader);
