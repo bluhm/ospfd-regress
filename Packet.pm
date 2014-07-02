@@ -79,7 +79,7 @@ sub consume_arp {
     my $arp = substr($$packet, 0, 28, "");
     my %fields;
     @fields{qw(hdr sha spa tha tpa)} = unpack("a8 a6 a4 a6 a4", $arp);
-    foreach my $addr (qw(spa tha)) {
+    foreach my $addr (qw(sha tha)) {
 	$fields{"${addr}_str"} = sprintf("%02x:%02x:%02x:%02x:%02x:%02x",
 	    unpack("C6", $fields{$addr}));
     }
