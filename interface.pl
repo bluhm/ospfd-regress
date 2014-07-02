@@ -218,28 +218,3 @@ foreach my $task (@tasks) {
 }
 
 print "Terminating\n"
-
-__END__
-
-- pruefen, dass hello mit dr bdr 0.0.0.0 und keine neighbors
-- hello mit dr bdr 0.0.0.0 senden, in als neighbor eintragen
-- pruefen, dass hello mit dr bdr 0.0.0.0 und uns als neighbors
-- warten bis WaitTimer abgelaufen ist
-- pruefen dass dr 10.188.6.17 ist
-
-@tasks = [
-    {
-	check => hello mit dr bdr 0.0.0.0 und keine neighbors
-	action => hello mit dr bdr 0.0.0.0 senden, in als neighbor eintragen
-    },
-    {
-	check => hello mit dr bdr 0.0.0.0
-	wait => uns als neighbors
-	action => warten bis WaitTimer abgelaufen ist
-    },
-    {
-	check => pruefen dass bdr 0.0.0.0 und uns als neighbors
-	wait => pruefen dass dr 10.188.6.17 ist
-	action => Test Pass
-    }
-];
