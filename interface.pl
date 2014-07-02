@@ -28,7 +28,7 @@ use AnyEvent::Strict;
 use Packet;
 use Tun 'opentun';
 
-my $tun_device = "/dev/$ENV{TUNDEV}" || "/dev/tun6";
+my $tun_device = $ENV{TUNDEV} ? "/dev/$ENV{TUNDEV}" : "/dev/tun6";
 my $area_id = "10.188.0.0";
 my $hello_interval = 2;
 # Parameters for test client
@@ -196,7 +196,8 @@ my @tasks = (
 	},
 	wait => {
 	    nbrs => [ "$t_router_id" ],
-	}
+	},
+	timeout => 5,  # 2 * hello interval + 1 second
     },
     {
 	name => "warten dass dr $o_router_id ist",
@@ -206,7 +207,8 @@ my @tasks = (
 	},
 	wait => {
 	    dr  => "$o_router_id",
-	}
+	},
+	timeout => 11,  # dead interval + hello interval + 1 second
     },
 );
 
@@ -214,6 +216,14 @@ foreach my $task (@tasks) {
     print "Task: $task->{name}\n";
     $check = $task->{check};
     $wait = $task->{wait};
+    my $timeout = $task->{timeout};
+    my $t;
+    if ($timeout) {
+	$t = AnyEvent->timer(
+	    after => $timeout,
+	    cb => sub { $cv->croak("timeout after $timeout seconds"); },
+	);
+    }
     $cv = AnyEvent->condvar;
     $cv->recv;
     my $action = $task->{action};
