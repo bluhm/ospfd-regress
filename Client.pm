@@ -49,6 +49,18 @@ my $is;
 
 sub handle_arp {
     my %arp = consume_arp(\$handle->{rbuf});
+    my %ether = (
+	src_str => $t_mac_address,
+	dst_str => $arp{sha_str},
+	type    => 0x0806,
+    );
+    $arp{op} = 2;
+    @arp{qw(sha_str spa_str tha_str tpa_str)} =
+	($t_mac_address, @arp{qw(tpa_str sha_str spa_str)});
+    $handle->push_write(
+	construct_ether(\%ether,
+	construct_arp(\%arp))
+    );
 }
 
 sub handle_ip4 {
@@ -216,7 +228,7 @@ sub child {
 	    $handle->destroy();
 	    undef $handle;
 	},
-    	on_read => sub {
+	on_read => sub {
 	    my %ether = consume_ether(\$handle->{rbuf});
 	    if ($ether{type} == 0x0800) {
 		handle_ip4(\$handle->{rbuf});
