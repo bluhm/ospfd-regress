@@ -98,9 +98,9 @@ sub handle_ip4 {
 	$reason = $compare->($wait);
     }
     if ($reason) {
-	    print "wait for hello because of: $reason\n";
+	print "wait for hello because of: $reason\n";
     } else {
-	    $cv->send();
+	$cv->send();
     }
 }
 
@@ -167,76 +167,76 @@ sub interface_state {
 }
 
 sub runtest {
-	my $self = shift;
-	my @tasks = @{$self->{tasks}};
-	(my $tun_number = $tun_device) =~ s/\D*//;
-	my $tun = opentun($tun_number);
+    my $self = shift;
+    my @tasks = @{$self->{tasks}};
+    (my $tun_number = $tun_device) =~ s/\D*//;
+    my $tun = opentun($tun_number);
 
-	my $handle; $handle = AnyEvent::Handle->new(
-	    fh => $tun,
-	    read_size => 70000,  # little more then max ip size
-	    on_error => sub {
-		$cv->croak("error on $tun_device: $!");
-		$handle->destroy();
-		undef $handle;
-	    },
-	    on_eof => sub {
-		$cv->croak("end-of-file on $tun_device: $!");
-		$handle->destroy();
-		undef $handle;
-	    },
-	);
+    my $handle; $handle = AnyEvent::Handle->new(
+	fh => $tun,
+	read_size => 70000,  # little more then max ip size
+	on_error => sub {
+	    $cv->croak("error on $tun_device: $!");
+	    $handle->destroy();
+	    undef $handle;
+	},
+	on_eof => sub {
+	    $cv->croak("end-of-file on $tun_device: $!");
+	    $handle->destroy();
+	    undef $handle;
+	},
+    );
 
-	$is = interface_state($handle, $t_router_id);
+    $is = interface_state($handle, $t_router_id);
 
-	$handle->on_read(sub {
-	    my %ether = consume_ether(\$handle->{rbuf});
-	    if ($ether{type} == 0x0800) {
-		handle_ip4(\$handle->{rbuf});
-	    } elsif ($ether{type} == 0x0806) {
-		handle_arp(\$handle->{rbuf});
-	    } else {
-		warn "ether type is not supported: $ether{type_hex}";
-	    }
-	});
+    $handle->on_read(sub {
+	my %ether = consume_ether(\$handle->{rbuf});
+	if ($ether{type} == 0x0800) {
+	    handle_ip4(\$handle->{rbuf});
+	} elsif ($ether{type} == 0x0806) {
+	    handle_arp(\$handle->{rbuf});
+	} else {
+	    warn "ether type is not supported: $ether{type_hex}";
+	}
+    });
 
 
-	$| = 1;
+    $| = 1;
 
-	foreach my $task (@tasks) {
-	    print "Task: $task->{name}\n";
-	    $check = $task->{check};
-	    $wait = $task->{wait};
-	    my $timeout = $task->{timeout};
-	    my $t;
-	    if ($timeout) {
-		$t = AnyEvent->timer(
-		    after => $timeout,
-		    cb => sub { $cv->croak("timeout after $timeout seconds"); },
-		);
-	    }
-	    $cv = AnyEvent->condvar;
-	    $cv->recv;
-	    my $action = $task->{action};
-	    $action->() if $action;
+    foreach my $task (@tasks) {
+	print "Task: $task->{name}\n";
+	$check = $task->{check};
+	$wait = $task->{wait};
+	my $timeout = $task->{timeout};
+	my $t;
+	if ($timeout) {
+	    $t = AnyEvent->timer(
+		after => $timeout,
+		cb => sub { $cv->croak("timeout after $timeout seconds"); },
+	    );
+	}
+	$cv = AnyEvent->condvar;
+	$cv->recv;
+	my $action = $task->{action};
+	$action->() if $action;
 }
 
 print "Terminating\n"
 }
 
 sub new {
-	my ($class, %args) = @_;
-	$args{logfile} ||= "client.log";
-	$args{up} = "Starting test client";
-	$args{down} = "Terminating";
-	$args{func} = \&runtest;
-	my $self = Proc::new($class, %args);
-	return $self;
+    my ($class, %args) = @_;
+    $args{logfile} ||= "client.log";
+    $args{up} = "Starting test client";
+    $args{down} = "Terminating";
+    $args{func} = \&runtest;
+    my $self = Proc::new($class, %args);
+    return $self;
 }
 
 # TODO delete it if we don't need it
 sub child {
-	my $self = shift;
+    my $self = shift;
 }
 
 1;
