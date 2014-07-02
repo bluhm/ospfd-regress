@@ -194,6 +194,7 @@ my @tasks = (
 	    bdr => "0.0.0.0",
 	    nbrs => [],
 	},
+	timeout => 3,  # hello interval + 1 second
 	action => sub {
 	    $is->{state}{nbrs} = [ "$t_router_id" ];
 	},
