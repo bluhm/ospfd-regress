@@ -1,4 +1,4 @@
-package FdPass;
+package PassFd;
 
 use strict;
 use warnings;
@@ -8,6 +8,6 @@ use parent 'Exporter';
 our @EXPORT_OK = qw(sendfd recvfd);
 
 require XSLoader;
-XSLoader::load('FdPass');
+XSLoader::load('PassFd');
 
 1;

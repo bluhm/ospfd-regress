@@ -5,7 +5,7 @@ use warnings;
 use Socket;
 use POSIX;
 use Fcntl qw(F_SETFD FD_CLOEXEC);
-use FdPass 'recvfd';
+use PassFd 'recvfd';
 
 socketpair(my $parent, my $child, AF_UNIX, SOCK_STREAM, PF_UNSPEC)
     or die "socketpair failed: $!";

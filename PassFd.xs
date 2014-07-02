@@ -20,7 +20,7 @@
 
 #include <sys/socket.h>
 
-MODULE = FdPass	PACKAGE = FdPass
+MODULE = PassFd	PACKAGE = PassFd
 
 SV *
 sendfd(PerlIO *so, PerlIO *fh)
