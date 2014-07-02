@@ -26,6 +26,7 @@ our @EXPORT = qw(
     consume_ospf
     consume_hello
     construct_ether
+    construct_arp
     construct_ip4
     construct_ospf
     construct_hello
@@ -89,6 +90,23 @@ sub consume_arp {
     @fields{qw(hrd pro hln pln op)} = unpack("n n C C n", $fields{hdr});
 
     return %fields;
+}
+
+sub construct_arp {
+    my $fields = shift;
+    my $subpacket = shift // "";
+
+    foreach my $addr (qw(sha tha)) {
+	$$fields{$addr} =
+	    pack("C6", map { hex $_ } split(/:/, $$fields{"${addr}_str"}));
+    }
+    foreach my $addr (qw(spa tpa)) {
+	$$fields{$addr} = pack("C4", split(/\./, $$fields{"${addr}_str"}));
+    }
+    $$fields{hdr} = pack("n n C C n", @$fields{qw(hrd pro hln pln op)});
+    my $packet = pack("a8 a6 a4 a6 a4", @$fields{qw(hdr sha spa tha tpa)});
+
+    return $packet. $subpacket;
 }
 
 sub consume_ip4 {

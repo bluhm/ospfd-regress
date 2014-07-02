@@ -133,6 +133,18 @@ $handle->on_read(sub {
 
 sub handle_arp {
     my %arp = consume_arp(\$handle->{rbuf});
+    my %ether = (
+	src_str => $t_mac_address,
+	dst_str => $arp{sha_str},
+	type    => 0x0806,
+    );
+    $arp{op} = 2;
+    @arp{qw(sha_str spa_str tha_str tpa_str)} =
+	($t_mac_address, @arp{qw(tpa_str sha_str spa_str)});
+    $handle->push_write(
+	construct_ether(\%ether,
+	construct_arp(\%arp))
+    );
 }
 
 sub handle_ip4 {
