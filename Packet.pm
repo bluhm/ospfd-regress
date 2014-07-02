@@ -83,6 +83,9 @@ sub consume_arp {
 	$fields{"${addr}_str"} = sprintf("%02x:%02x:%02x:%02x:%02x:%02x",
 	    unpack("C6", $fields{$addr}));
     }
+    foreach my $addr (qw(spa tpa)) {
+	$fields{"${addr}_str"} = join(".", unpack("C4", $fields{$addr}));
+    }
     @fields{qw(hrd pro hln pln op)} = unpack("n n C C n", $fields{hdr});
 
     return %fields;
