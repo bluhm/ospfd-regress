@@ -1,33 +1,52 @@
 #!/usr/bin/perl
 
+# Copyright (c) 2014 Alexander Bluhm <bluhm@openbsd.org>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
 use strict;
 use warnings;
 use Socket;
-use POSIX;
+use POSIX qw(_exit);
 use Fcntl qw(F_SETFD FD_CLOEXEC);
 use PassFd 'recvfd';
 
 socketpair(my $parent, my $child, AF_UNIX, SOCK_STREAM, PF_UNSPEC)
-    or die "socketpair failed: $!";
+    or die "Socketpair failed: $!";
 $child->fcntl(F_SETFD, 0)
-    or die "fcntl setfd failed: $!";
+    or die "Fcntl setfd failed: $!";
 
 defined(my $pid = fork())
-    or die "fork failed: $!";
+    or die "Fork failed: $!";
 unless ($pid) {
     # child process
-    close($parent);
+    close($parent)
+	or do { warn "Close parent socket failed: $!"; _exit(3); };
     my @cmd = ('sudo', '-C', $child->fileno()+1, './opentun',
 	$child->fileno(), 6);
     exec(@cmd);
     warn "exec @cmd failed: $!";
-    POSIX::_exit(1);
+    _exit(3);
 }
 # parent process
-close($child);
+close($child)
+    or die "Close child socket failed: $!";
 my $tun = recvfd($parent)
-    or die "recvfd failed: $!";
-wait();
+    or die "Recvfd failed: $!";
+wait()
+    or die "Wait failed: $!";
+$? == 0
+    or die "Child process failed: $?";
 
 for (;;) {
     my $n = sysread($tun, my $buf, 70000);

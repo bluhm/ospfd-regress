@@ -21,7 +21,7 @@ use warnings;
 use Socket;
 use Fcntl qw(F_SETFD FD_CLOEXEC);
 use PassFd qw(sendfd recvfd);
-use POSIX;
+use POSIX qw(_exit);
 
 socketpair(my $parent, my $child, AF_UNIX, SOCK_STREAM, PF_UNSPEC)
     or die "socketpair failed: $!";
@@ -33,12 +33,12 @@ defined(my $pid = fork())
 unless ($pid) {
     # child process
     close($parent)
-	or do { warn "Close parent socket failed: $!"; POSIX::_exit(1); };
+	or do { warn "Close parent socket failed: $!"; _exit(1); };
     open(my $fd, '<', $0)
-	or do { warn "Open $0 failed: $!"; POSIX::_exit(1); };
+	or do { warn "Open $0 failed: $!"; _exit(1); };
     sendfd($child, $fd)
-	or do { warn "Sendfd failed: $!"; POSIX::_exit(1); };
-    POSIX::_exit(0);
+	or do { warn "Sendfd failed: $!"; _exit(1); };
+    _exit(0);
 }
 # parent process
 close($child)
@@ -48,7 +48,7 @@ my $fd = recvfd($parent)
 wait()
     or die "Wait failed: $!";
 $? == 0
-    or die "Child failed: $?";
+    or die "Child process failed: $?";
 
 defined (my $line = <$fd>)
     or die "Read from fd failed: $!";
