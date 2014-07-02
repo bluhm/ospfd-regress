@@ -28,12 +28,15 @@ use AnyEvent::Strict;
 use Packet;
 use Tun 'opentun';
 
-my $tun_device = $ENV{TUNDEV} || "/dev/tun6";
-my $ospf_address = $ENV{TUNIP} || "10.188.6.18";
-my $mac_address = "2:3:4:5:6:7";
-my $router_id = "10.188.6.18";
+my $tun_device = "/dev/$ENV{TUNDEV}" || "/dev/tun6";
 my $area_id = "10.188.0.0";
 my $hello_interval = 2;
+# Parameters for test client
+my $t_mac_address = "2:3:4:5:6:7";
+my $t_ospf_address = "10.188.6.18";
+my $t_router_id = "10.188.6.18";
+# Parameters for ospfd
+my $o_router_id = $ENV{TUNIP} || "10.188.6.17";
 
 my $check;
 my $wait;
@@ -71,7 +74,7 @@ sub interface_state {
 	interval => $hello_interval,
 	cb => sub {
 	    my %ether = (
-		src_str => $mac_address,
+		src_str => $t_mac_address,
 		dst_str => "01:00:5e:00:00:05",  # multicast ospf
 		type    => 0x0800,               # ipv4
 	    );
@@ -101,7 +104,7 @@ sub interface_state {
 		routerdeadinterval           => 4 * $hello_interval,
 		designated_router_str        => $state{dr},
 		backup_designated_router_str => $state{bdr},
-		neighbors_str                => [ "10.188.6.17" ],
+		neighbors_str                => [ "$o_router_id" ],
 	    );
 	    $handle->push_write(
 		construct_ether(\%ether,
@@ -115,7 +118,7 @@ sub interface_state {
     return \%state;
 }
 
-my $is = interface_state($router_id);
+my $is = interface_state($t_router_id);
 
 $handle->on_read(sub {
     my %ether = consume_ether(\$handle->{rbuf});
@@ -175,34 +178,34 @@ $handle->on_read(sub {
 my @tasks = (
     {
 	name => "hello mit dr bdr 0.0.0.0 empfangen, ".
-	    "10.188.6.18 als neighbor eintragen",
+	    "$t_router_id als neighbor eintragen",
 	check => {
 	    dr  => "0.0.0.0",
 	    bdr => "0.0.0.0",
 	    nbrs => [],
 	},
 	action => sub {
-	    $is->{state}{nbrs} = [ "10.188.6.18" ];
+	    $is->{state}{nbrs} = [ "$t_router_id" ];
 	},
     },
     {
-	name => "auf neighbor 10.188.6.18 warten",
+	name => "auf neighbor $t_router_id warten",
 	check => {
 	    dr  => "0.0.0.0",
 	    bdr => "0.0.0.0",
 	},
 	wait => {
-	    nbrs => [ "10.188.6.18" ],
+	    nbrs => [ "$t_router_id" ],
 	}
     },
     {
-	name => "warten dass dr 10.188.6.17 ist",
+	name => "warten dass dr $o_router_id ist",
 	check => {
 	    bdr => "0.0.0.0",
-	    nbrs => [ "10.188.6.18" ],
+	    nbrs => [ "$t_router_id" ],
 	},
 	wait => {
-	    dr  => "10.188.6.17",
+	    dr  => "$o_router_id",
 	}
     },
 );
