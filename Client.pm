@@ -105,7 +105,7 @@ sub get_is {
 }
 
 sub interface_state {
-    my ($handle, $id) = @_;
+    my ($id) = @_;
 
     my %state = (
 	dr  => "0.0.0.0",
@@ -229,7 +229,7 @@ sub child {
 	},
     );
 
-    $is = interface_state($handle, $t_router_id);
+    $is = interface_state($t_router_id);
 }
 
 1;
