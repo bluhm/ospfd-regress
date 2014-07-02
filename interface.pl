@@ -158,14 +158,14 @@ $handle->on_read(sub {
 
     my $error = $compare->($check);
     return $cv->croak("check: $error") if $error;
-    print "check successful\n";
+    print "check hello successful\n";
 
     my $reason;
     if ($wait) {
 	$reason = $compare->($wait);
     }
     if ($reason) {
-	print "wait because of: $reason\n";
+	print "wait for hello because of: $reason\n";
     } else {
 	$cv->send();
     }
