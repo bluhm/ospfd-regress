@@ -213,11 +213,11 @@ my @tasks = (
     {
 	name => "warten dass dr $o_router_id ist",
 	check => {
-	    bdr => "0.0.0.0",
 	    nbrs => [ "$t_router_id" ],
 	},
 	wait => {
 	    dr  => "$o_router_id",
+	    bdr => "$t_router_id",
 	},
 	timeout => 11,  # dead interval + hello interval + 1 second
     },
