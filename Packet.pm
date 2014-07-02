@@ -21,6 +21,7 @@ use Carp;
 
 our @EXPORT = qw(
     consume_ether
+    consume_arp
     consume_ip4
     consume_ospf
     consume_hello
@@ -52,6 +53,7 @@ sub consume_ether {
 	$fields{"${addr}_str"} = sprintf("%02x:%02x:%02x:%02x:%02x:%02x",
 	    unpack("C6", $fields{$addr}));
     }
+    $fields{type_hex} = sprintf("0x%04x", $fields{type});
 
     return %fields;
 }
@@ -67,6 +69,23 @@ sub construct_ether {
     my $packet = pack("a6 a6 n", @$fields{qw(dst src type)});
 
     return $packet. $subpacket;
+}
+
+sub consume_arp {
+    my $packet = shift;
+
+    length($$packet) >= 28
+	or croak "arp packet too short: ". length($$packet);
+    my $arp = substr($$packet, 0, 28, "");
+    my %fields;
+    @fields{qw(hdr sha spa tha tpa)} = unpack("a8 a6 a4 a6 a4", $arp);
+    foreach my $addr (qw(sha tha)) {
+	$fields{"${addr}_str"} = sprintf("%02x:%02x:%02x:%02x:%02x:%02x",
+	    unpack("C6", $fields{$addr}));
+    }
+    @fields{qw(hrd pro hln pln op)} = unpack("n n C C n", $fields{hdr});
+
+    return %fields;
 }
 
 sub consume_ip4 {

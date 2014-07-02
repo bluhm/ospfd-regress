@@ -122,10 +122,20 @@ my $is = interface_state($t_router_id);
 
 $handle->on_read(sub {
     my %ether = consume_ether(\$handle->{rbuf});
-    unless ($ether{type} == 0x0800) {
-	warn "ether type is not ip4";
-	return;
+    if ($ether{type} == 0x0800) {
+	handle_ip4();
+    } elsif ($ether{type} == 0x0806) {
+	handle_arp();
+    } else {
+	warn "ether type is not supported: $ether{type_hex}";
     }
+});
+
+sub handle_arp {
+    my %arp = consume_arp(\$handle->{rbuf});
+}
+
+sub handle_ip4 {
     my %ip4 = consume_ip4(\$handle->{rbuf});
     unless ($ip4{p} == 89) {
 	warn "ip4 proto is not ospf";
@@ -173,7 +183,7 @@ $handle->on_read(sub {
     } else {
 	$cv->send();
     }
-});
+}
 
 my @tasks = (
     {
@@ -184,6 +194,7 @@ my @tasks = (
 	    bdr => "0.0.0.0",
 	    nbrs => [],
 	},
+	timeout => 3,  # hello interval + 1 second
 	action => sub {
 	    $is->{state}{nbrs} = [ "$t_router_id" ];
 	},
