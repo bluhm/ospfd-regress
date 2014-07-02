@@ -27,9 +27,9 @@ use AnyEvent::Strict;
 
 use Packet;
 
-my $tun_device = "/dev/tun6";
-my $mac_address = "0:1:2:3:4:5";
-my $ospf_address = "10.188.6.18";
+my $tun_device = $ENV{TUNDEV} || "/dev/tun6";
+my $ospf_address = $ENV{TUNIP} || "10.188.6.18";
+my $mac_address = "2:3:4:5:6:7";
 my $router_id = "10.188.6.18";
 my $area_id = "10.188.0.0";
 my $hello_interval = 2;
