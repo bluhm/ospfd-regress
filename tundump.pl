@@ -16,37 +16,10 @@
 
 use strict;
 use warnings;
-use Socket;
-use POSIX qw(_exit);
-use Fcntl qw(F_SETFD FD_CLOEXEC);
-use PassFd 'recvfd';
+use Tun 'opentun';
 
-socketpair(my $parent, my $child, AF_UNIX, SOCK_STREAM, PF_UNSPEC)
-    or die "Socketpair failed: $!";
-$child->fcntl(F_SETFD, 0)
-    or die "Fcntl setfd failed: $!";
-
-defined(my $pid = fork())
-    or die "Fork failed: $!";
-unless ($pid) {
-    # child process
-    close($parent)
-	or do { warn "Close parent socket failed: $!"; _exit(3); };
-    my @cmd = ('sudo', '-C', $child->fileno()+1, './opentun',
-	$child->fileno(), 6);
-    exec(@cmd);
-    warn "exec @cmd failed: $!";
-    _exit(3);
-}
-# parent process
-close($child)
-    or die "Close child socket failed: $!";
-my $tun = recvfd($parent)
-    or die "Recvfd failed: $!";
-wait()
-    or die "Wait failed: $!";
-$? == 0
-    or die "Child process failed: $?";
+my $tun = opentun(6)
+    or die "Open tun device 6 failed: $!";
 
 for (;;) {
     my $n = sysread($tun, my $buf, 70000);
