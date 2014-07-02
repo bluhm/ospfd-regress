@@ -42,4 +42,11 @@ stamp-syntax: ${ARGS}
 .endfor
 	@date >$@
 
+.SUFFIXES: .xs .so
+
+.xs.so:
+	xsubpp -prototypes $> >${@:S/.so$/.c/}
+	gcc -shared -Wall -I/usr/libdata/perl5/amd64-openbsd/5.18.2/CORE -o $@ ${@:S/.so$/.c/}
+	perl -M${@:R} -e ''
+
 .include <bsd.regress.mk>
