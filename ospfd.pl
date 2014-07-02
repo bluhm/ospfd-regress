@@ -43,8 +43,7 @@ $o->run;
 $o->up;
 if ($args{client}) {
 	my $c = Client->new(
-	    $args{client},
-	    %{$args{tasks}},
+	    %args,
 	);
 	$c->run;
 	$c->down;

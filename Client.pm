@@ -45,6 +45,8 @@ my $o_router_id = $ENV{TUNIP} || "10.188.6.17";
 my $check;
 my $wait;
 my $cv;
+my $is;
+
 
 sub handle_arp {
     my $rbuf = shift;
@@ -100,6 +102,10 @@ sub handle_ip4 {
     } else {
 	    $cv->send();
     }
+}
+
+sub get_is {
+    return $is;
 }
 
 sub interface_state {
@@ -161,6 +167,8 @@ sub interface_state {
 }
 
 sub runtest {
+	my $self = shift;
+	my @tasks = @{$self->{tasks}};
 	(my $tun_number = $tun_device) =~ s/\D*//;
 	my $tun = opentun($tun_number);
 
@@ -179,7 +187,7 @@ sub runtest {
 	    },
 	);
 
-	my $is = interface_state($handle, $t_router_id);
+	$is = interface_state($handle, $t_router_id);
 
 	$handle->on_read(sub {
 	    my %ether = consume_ether(\$handle->{rbuf});
@@ -194,44 +202,6 @@ sub runtest {
 
 
 	$| = 1;
-
-my @tasks = (
-	{
-	    name => "hello mit dr bdr 0.0.0.0 empfangen, ".
-		"10.188.6.18 als neighbor eintragen",
-	    check => {
-		dr  => "0.0.0.0",
-		bdr => "0.0.0.0",
-		nbrs => [],
-	    },
-	    action => sub {
-		$is->{state}{nbrs} = [ "10.188.6.18" ];
-	    },
-	},
-	{
-	    name => "auf neighbor 10.188.6.18 warten",
-	    check => {
-		dr  => "0.0.0.0",
-		bdr => "0.0.0.0",
-	    },
-	    wait => {
-		nbrs => [ "10.188.6.18" ],
-	    },
-	    timeout => 5,  # 2 * hello interval + 1 second
-	},
-	{
-	    name => "warten dass dr 10.188.6.17 ist",
-	    check => {
-		nbrs => [ "10.188.6.18" ],
-	    },
-	    wait => {
-		dr  => "10.188.6.17",
-		bdr => "10.188.6.18",
-	    },
-	    timeout => 11,  # dead interval + hello interval + 1 second
-	},
-);
-
 
 	foreach my $task (@tasks) {
 	    print "Task: $task->{name}\n";
@@ -255,7 +225,7 @@ print "Terminating\n"
 }
 
 sub new {
-	my ($class, $client, %args) = @_;
+	my ($class, %args) = @_;
 	$args{logfile} ||= "client.log";
 	$args{up} = "Starting test client";
 	$args{down} = "Terminating";
