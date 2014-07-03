@@ -191,18 +191,23 @@ sub interface_state_machine {
     return \%state;
 }
 
+sub ism_set_state {
+    my $state = shift;
+
+    my @states = ref($state) eq 'ARRAY' ? @$state : ( $state || () );
+    for (my $i = 0; $i < @states; $i++) {
+	$isms[$i] ||= interface_state_machine();
+	%{$isms[$i]} = (%{$isms[$i]}, %{$states[$i]});
+    }
+}
+
 sub runtest {
     my $self = shift;
     my @tasks = @{$self->{tasks}};
 
     $| = 1;
 
-    my @states = ref($self->{state}) eq 'ARRAY' ?
-	@{$self->{state}} : ( $self->{state} || () );
-    for (my $i = 0; $i < @states; $i++) {
-	$isms[$i] ||= interface_state_machine();
-	%{$isms[$i]} = (%{$isms[$i]}, %{$states[$i]});
-    }
+    ism_set_state($self->{state});
 
     foreach my $task (@tasks) {
 	print "Task: $task->{name}\n";
@@ -218,12 +223,7 @@ sub runtest {
 	}
 	$cv = AnyEvent->condvar;
 	$cv->recv;
-	@states = ref($task->{state}) eq 'ARRAY' ?
-	    @{$task->{state}} : ( $task->{state} || () );
-	for (my $i = 0; $i < @states; $i++) {
-	    $isms[$i] ||= interface_state_machine();
-	    %{$isms[$i]} = (%{$isms[$i]}, %{$states[$i]});
-	}
+	ism_set_state($task->{state});
     }
 
     print "Terminating\n";
