@@ -43,9 +43,8 @@ our %args = (
 		    bdr => "0.0.0.0",
 		    nbrs => [],
 		},
-		action => sub {
-		    my $is = Client::get_is();
-		    $is->{nbrs} = [ "10.188.6.17" ];
+		state => {
+		    nbrs => [ "10.188.6.17" ],
 		},
 	    },
 	    {

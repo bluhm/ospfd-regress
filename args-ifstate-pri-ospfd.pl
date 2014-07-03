@@ -38,9 +38,8 @@ our %args = (
 	router_id => "10.188.6.18",
 	tun_device => $tun_device,
 	ospfd_ip => $ospfd_ip,
-	action => sub {
-	    my $is = Client::get_is();
-	    $is->{pri} = 0;
+	state => {
+	    pri => 0,
 	},
 	tasks => [
 	    {
@@ -51,9 +50,8 @@ our %args = (
 		    bdr  => "0.0.0.0",
 		    nbrs => [],
 		},
-		action => sub {
-		    my $is = Client::get_is();
-		    $is->{nbrs} = [ "10.188.6.17" ];
+		state => {
+		    nbrs => [ "10.188.6.17" ],
 		},
 	    },
 	    {

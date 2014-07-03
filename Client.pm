@@ -45,7 +45,7 @@ my $handle;
 my $check;
 my $wait;
 my $cv;
-my $is;
+my $ism;
 
 sub handle_arp {
     my %arp = consume_arp(\$handle->{rbuf});
@@ -113,11 +113,7 @@ sub handle_ip4 {
     }
 }
 
-sub get_is {
-    return $is;
-}
-
-sub interface_state {
+sub interface_state_machine {
     my ($id) = @_;
 
     my %state = (
@@ -182,8 +178,8 @@ sub runtest {
 
     $| = 1;
 
-    my $action = $self->{action};
-    $action->() if $action;
+    my $state = $self->{state};
+    %$ism = (%$ism, %$state) if $state;
 
     foreach my $task (@tasks) {
 	print "Task: $task->{name}\n";
@@ -199,8 +195,8 @@ sub runtest {
 	}
 	$cv = AnyEvent->condvar;
 	$cv->recv;
-	$action = $task->{action};
-	$action->() if $action;
+	$state = $task->{state};
+	%$ism = (%$ism, %$state) if $state;
     }
 
     print "Terminating\n";
@@ -262,7 +258,7 @@ sub child {
 	},
     );
 
-    $is = interface_state($c_router_id);
+    $ism = interface_state_machine($c_router_id);
 }
 
 1;
