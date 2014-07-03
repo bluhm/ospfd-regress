@@ -37,7 +37,7 @@ our %args = (
 	tasks => [
 	    {
 		name => "hello mit dr bdr 0.0.0.0 empfangen, ".
-		    "10.188.6.18 als neighbor eintragen",
+		    "10.188.6.17 als neighbor eintragen",
 		check => {
 		    dr  => "0.0.0.0",
 		    bdr => "0.0.0.0",
@@ -45,7 +45,7 @@ our %args = (
 		},
 		action => sub {
 		    my $is = Client::get_is();
-		    $is->{state}{nbrs} = [ "10.188.6.18" ];
+		    $is->{nbrs} = [ "10.188.6.17" ];
 		},
 	    },
 	    {
