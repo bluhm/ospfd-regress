@@ -198,7 +198,8 @@ sub runtest {
 	$action->() if $action;
     }
 
-    print "Terminating\n"
+    print "Terminating\n";
+    sleep 1;
 }
 
 sub new {
