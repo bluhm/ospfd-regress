@@ -46,7 +46,7 @@ my $handle;
 my $check;
 my $wait;
 my $cv;
-my $ism;
+my @isms;
 
 sub handle_arp {
     my %arp = consume_arp(\$handle->{rbuf});
@@ -197,8 +197,12 @@ sub runtest {
 
     $| = 1;
 
-    my $state = $self->{state};
-    %$ism = (%$ism, %$state) if $state;
+    my @states = ref($self->{state}) eq 'ARRAY' ?
+	@{$self->{state}} : ( $self->{state} || () );
+    for (my $i = 0; $i < @states; $i++) {
+	$isms[$i] ||= interface_state_machine();
+	%{$isms[$i]} = (%{$isms[$i]}, %{$states[$i]});
+    }
 
     foreach my $task (@tasks) {
 	print "Task: $task->{name}\n";
@@ -214,8 +218,12 @@ sub runtest {
 	}
 	$cv = AnyEvent->condvar;
 	$cv->recv;
-	$state = $task->{state};
-	%$ism = (%$ism, %$state) if $state;
+	@states = ref($task->{state}) eq 'ARRAY' ?
+	    @{$task->{state}} : ( $task->{state} || () );
+	for (my $i = 0; $i < @states; $i++) {
+	    $isms[$i] ||= interface_state_machine();
+	    %{$isms[$i]} = (%{$isms[$i]}, %{$states[$i]});
+	}
     }
 
     print "Terminating\n";
@@ -278,8 +286,6 @@ sub child {
 	    $handle->{rbuf} = "";  # packets must not cumulate
 	},
     );
-
-    $ism = interface_state_machine();
 }
 
 1;
