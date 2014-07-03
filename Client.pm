@@ -127,8 +127,6 @@ sub handle_hello {
 }
 
 sub interface_state_machine {
-    my ($id) = @_;
-
     my %state = (
 	dr  => "0.0.0.0",
 	bdr => "0.0.0.0",
@@ -153,15 +151,15 @@ sub interface_state_machine {
 		off     => 0,               # no fragment
 		ttl     => 1,               # only for direct connected
 		p       => 89,              # protocol ospf
-		src_str => $id,             # use router id as address
+		src_str => $ism_ip,
 		dst_str => "224.0.0.5",     # all ospf router multicast
 	    );
 	    my %ospf = (
-		version       => 2,         # ospf v2
-		type	      => 1,         # hello
-		router_id_str => $id,
+		version       => 2,           # ospf v2
+		type	      => 1,           # hello
+		router_id_str => $ism_rtrid,
 		area_id_str   => $area,
-		autype        => 0,         # no authentication
+		autype        => 0,           # no authentication
 	    );
 	    my %hello = (
 		network_mask_str             => "255.255.255.0",
@@ -273,7 +271,7 @@ sub child {
 	},
     );
 
-    $ism = interface_state_machine($ism_rtrid);
+    $ism = interface_state_machine();
 }
 
 1;
