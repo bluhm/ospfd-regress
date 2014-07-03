@@ -74,10 +74,14 @@ sub handle_ip4 {
 	or return "ospfd rtrid is $ospf{router_id_str}: expected $$o_router_id";
     $ospf{area_id_str} eq $area_id
 	or return "ospfd area is $ospf{area_id_str}: expected $area_id";
-    unless ($ospf{type} == 1) {
-	warn "ospf type is not hello";
-	return;
+    if ($ospf{type} == 1) {
+	handle_hello();
+    } else {
+	warn "ospf type is not supported: $ospf{type}";
     }
+}
+
+sub handle_hello {
     my %hello = consume_hello(\$handle->{rbuf});
 
     my $compare = sub {
@@ -251,9 +255,9 @@ sub child {
 	on_read => sub {
 	    my %ether = consume_ether(\$handle->{rbuf});
 	    if ($ether{type} == 0x0800) {
-		handle_ip4(\$handle->{rbuf});
+		handle_ip4();
 	    } elsif ($ether{type} == 0x0806) {
-		handle_arp(\$handle->{rbuf});
+		handle_arp();
 	    } else {
 		warn "ether type is not supported: $ether{type_hex}";
 	    }
