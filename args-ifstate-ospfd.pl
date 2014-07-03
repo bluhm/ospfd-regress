@@ -14,7 +14,7 @@ our %args = (
 	    },
 	    areas => {
 		$area => {
-		    "$ENV{TUNDEV}:$ENV{TUNIP}" => {
+		    "tun$ENV{TUNDEV}:$ENV{TUNIP}" => {
 			'metric' => '15',
 			'hello-interval' => $hello_interval,
 			'router-dead-time' => '8',

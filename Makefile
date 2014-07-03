@@ -4,7 +4,7 @@ ARGS !=			cd ${.CURDIR} && ls args-*.pl
 TARGETS ?=		${ARGS}
 REGRESS_TARGETS =	${TARGETS:S/^/run-regress-/}
 CLEANFILES +=		*.log ospfd.conf ktrace.out stamp-*
-TUNDEV ?=		tun5
+TUNDEV ?=		5
 TUNIP ?=		10.188.6.17
 
 # Set variables so that make runs with and without obj directory.
@@ -23,9 +23,9 @@ PERLPATH =	${.CURDIR}/
 
 .for a in ${ARGS}
 run-regress-$a: $a
-	@-${SUDO} ifconfig ${TUNDEV} ${TUNIP} netmask 255.255.255.0 link0
+	@-${SUDO} ifconfig tun${TUNDEV} ${TUNIP} netmask 255.255.255.0 link0
 	time TUNDEV=${TUNDEV} TUNIP=${TUNIP} SUDO=${SUDO} KTRACE=${KTRACE} OSPFD=${OSPFD} perl ${PERLINC} ${PERLPATH}ospfd.pl ${PERLPATH}$a
-	@-${SUDO} ifconfig ${TUNDEV} destroy
+	@-${SUDO} ifconfig tun${TUNDEV} destroy
 .endfor
 
 # make perl syntax check for all args files

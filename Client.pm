@@ -31,7 +31,7 @@ use AnyEvent::Strict;
 use Packet;
 use Tun 'opentun';
 
-my $tun_device = $ENV{TUNDEV} ? "/dev/$ENV{TUNDEV}" : "/dev/tun5";
+my $tun_device = $ENV{TUNDEV} || 5;
 my $area_id;
 my $hello_interval;
 # Parameters for test client
@@ -224,8 +224,7 @@ sub child {
     $c_router_id = $self->{router_id}
 	or die "client router id missing";
 
-    (my $tun_number = $tun_device) =~ s/\D*//;
-    my $tun = opentun($tun_number);
+    my $tun = opentun($tun_device);
 
     $handle = AnyEvent::Handle->new(
 	fh => $tun,
