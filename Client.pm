@@ -70,7 +70,10 @@ sub handle_ip4 {
 	return;
     }
     my %ospf = consume_ospf(\$handle->{rbuf});
-    # TODO check router id
+    $ospf{router_id_str} eq $o_router_id
+	or return "ospfd rtrid is $ospf{router_id_str}: expected $$o_router_id";
+    $ospf{area_id_str} eq $area_id
+	or return "ospfd area is $ospf{area_id_str}: expected $area_id";
     unless ($ospf{type} == 1) {
 	warn "ospf type is not hello";
 	return;
