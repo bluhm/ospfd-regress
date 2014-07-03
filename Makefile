@@ -3,7 +3,10 @@
 ARGS !=			cd ${.CURDIR} && ls args-*.pl
 TARGETS ?=		${ARGS}
 REGRESS_TARGETS =	${TARGETS:S/^/run-regress-/}
-CLEANFILES +=		*.log ospfd.conf ktrace.out stamp-*
+CLEANFILES +=		*.log ospfd.conf ktrace.out stamp-* 
+XSFILES =		PassFd.xs
+PERLHEADER !=		perl -MConfig -e 'print "$$Config{archlib}/CORE"'
+CLEANFILES +=		${XSFILES:S/.xs$/.c/} ${XSFILES:S/.xs$/.o/} ${XSFILES:S/.xs$/.so/}
 TUNDEV ?=		6
 TUNIP ?=		10.188.6.17
 
@@ -22,7 +25,7 @@ PERLPATH =	${.CURDIR}/
 # test parameters.
 
 .for a in ${ARGS}
-run-regress-$a: $a
+run-regress-$a: $a ${XSFILES:S/.xs$/.so/}
 	@-${SUDO} ifconfig tun${TUNDEV} ${TUNIP} netmask 255.255.255.0 link0
 	time TUNDEV=${TUNDEV} TUNIP=${TUNIP} SUDO=${SUDO} KTRACE=${KTRACE} OSPFD=${OSPFD} perl ${PERLINC} ${PERLPATH}ospfd.pl ${PERLPATH}$a
 .endfor
@@ -43,7 +46,7 @@ stamp-syntax: ${ARGS}
 
 .xs.so:
 	xsubpp -prototypes $> >${@:S/.so$/.c/}
-	gcc -shared -Wall -I/usr/libdata/perl5/amd64-openbsd/5.18.2/CORE -o $@ ${@:S/.so$/.c/}
+	gcc -shared -Wall -I${PERLHEADER} -o $@ ${@:S/.so$/.c/}
 	perl -M${@:R} -e ''
 
 .include <bsd.regress.mk>
