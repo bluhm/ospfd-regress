@@ -31,7 +31,7 @@ use AnyEvent::Strict;
 use Packet;
 use Tun 'opentun';
 
-my $tun_device;
+my $tun_number;
 my $area;
 my $hello_interval;
 # Parameters for interface state machine of the test
@@ -233,24 +233,24 @@ sub child {
 	or die "client ospf address missing";
     $ism_rtrid = $self->{router_id}
 	or die "client router id missing";
-    $tun_device =  $self->{tun_device}
-	or die "tun device missing";
+    $tun_number =  $self->{tun_number}
+	or die "tun device number missing";
     # XXX split ip and rtrid
     $ospfd_ip = $ospfd_rtrid = $self->{ospfd_ip}
 	or die "ospfd ip missing";
 
-    my $tun = opentun($tun_device);
+    my $tun = opentun($tun_number);
 
     $handle = AnyEvent::Handle->new(
 	fh => $tun,
 	read_size => 70000,  # little more then max ip size
 	on_error => sub {
-	    $cv->croak("error on $tun_device: $!");
+	    $cv->croak("error on tun device $tun_number: $!");
 	    $handle->destroy();
 	    undef $handle;
 	},
 	on_eof => sub {
-	    $cv->croak("end-of-file on $tun_device: $!");
+	    $cv->croak("end-of-file on tun device $tun_number: $!");
 	    $handle->destroy();
 	    undef $handle;
 	},

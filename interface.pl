@@ -28,7 +28,7 @@ use AnyEvent::Strict;
 use Packet;
 use Tun 'opentun';
 
-my $tun_device = $ENV{TUNDEV} || 6;
+my $tun_number = $ENV{TUNDEV} || 6;
 my $area_id = "10.188.0.0";
 my $hello_interval = 2;
 # Parameters for test client
@@ -42,18 +42,18 @@ my $check;
 my $wait;
 my $cv;
 
-my $tun = opentun($tun_device);
+my $tun = opentun($tun_number);
 
 my $handle; $handle = AnyEvent::Handle->new(
     fh => $tun,
     read_size => 70000,  # little more then max ip size
     on_error => sub {
-	$cv->croak("error on $tun_device: $!");
+	$cv->croak("error on tun device $tun_number: $!");
 	$handle->destroy();
 	undef $handle;
     },
     on_eof => sub {
-	$cv->croak("end-of-file on $tun_device: $!");
+	$cv->croak("end-of-file on tun device $tun_number: $!");
 	$handle->destroy();
 	undef $handle;
     },

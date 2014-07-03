@@ -28,14 +28,13 @@ use AnyEvent::Strict;
 use Packet;
 use Tun 'opentun';
 
-my $tun_device = "/dev/tun6";
-my $mac_address = "1:2:3:4:5:6";
-my $ospf_address = "10.188.6.18";
-my $router_id = "10.188.6.18";
+my $tun_number = 6;
+my $mac = "1:2:3:4:5:6";
+my $ip = "10.188.6.18";
+my $rtrid = "10.188.0.18";
 
 my $cv = AnyEvent->condvar;
 
-(my $tun_number = $tun_device) =~ s/\D*//;
 my $tun = opentun($tun_number);
 
 my $handle; $handle = AnyEvent::Handle->new(
@@ -70,8 +69,8 @@ my $handle; $handle = AnyEvent::Handle->new(
 	my %hello = consume_hello(\$handle->{rbuf});
 	$handle->{rbuf} = "";  # just to be sure, packets must not cumulate
 
-	$ether{src_str} = $mac_address;
-	$ip{src_str} = $ospf_address;
+	$ether{src_str} = $mac;
+	$ip{src_str} = $ip;
 	$ospf{router_id_str} = $router_id;
 	$hello{backup_designated_router_str} = $router_id;
 	$hello{neighbors_str} = [ "10.188.6.17" ];

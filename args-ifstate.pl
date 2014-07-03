@@ -4,7 +4,7 @@ use Client;
 
 my $area = "10.188.0.0";
 my $hello_interval = 2;
-my $tun_device = $ENV{TUNDEV};
+my $tun_number = $ENV{TUNDEV};
 my $ospfd_ip = $ENV{TUNIP};
 
 our %args = (
@@ -16,7 +16,7 @@ our %args = (
 	    },
 	    areas => {
 		$area => {
-		    "tun$tun_device:$ospfd_ip" => {
+		    "tun$tun_number:$ospfd_ip" => {
 			'metric' => '15',
 			'hello-interval' => $hello_interval,
 			'router-dead-time' => '8',
@@ -32,7 +32,7 @@ our %args = (
 	mac_address => "2:3:4:5:6:7",
 	ospf_address => "10.188.6.18",
 	router_id => "10.188.6.18",
-	tun_device => $tun_device,
+	tun_number => $tun_number,
 	ospfd_ip => $ospfd_ip,
 	tasks => [
 	    {
