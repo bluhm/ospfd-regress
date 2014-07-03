@@ -70,11 +70,16 @@ sub handle_ip {
 	warn "ip proto is not ospf";
 	return;
     }
+    $ip{src_str} eq $ospfd_ip
+	or return $cv->croak(
+	"ospfd src ip is $ip{src_str}: expected $ospfd_ip");
     my %ospf = consume_ospf(\$handle->{rbuf});
     $ospf{router_id_str} eq $ospfd_rtrid
-	or return "ospfd rtrid is $ospf{router_id_str}: expected $$ospfd_rtrid";
+	or return $cv->croak(
+	"ospfd rtrid is $ospf{router_id_str}: expected $ospfd_rtrid");
     $ospf{area_id_str} eq $area
-	or return "ospfd area is $ospf{area_id_str}: expected $area";
+	or return $cv->croak(
+	"ospfd area is $ospf{area_id_str}: expected $area");
     if ($ospf{type} == 1) {
 	handle_hello();
     } else {
