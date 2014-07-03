@@ -70,6 +70,7 @@ sub handle_ip4 {
 	return;
     }
     my %ospf = consume_ospf(\$handle->{rbuf});
+    # TODO check router id
     unless ($ospf{type} == 1) {
 	warn "ospf type is not hello";
 	return;
@@ -122,6 +123,7 @@ sub interface_state {
     my %state = (
 	dr  => "0.0.0.0",
 	bdr => "0.0.0.0",
+	pri => 1,
     );
 
     my $hello_count = 0;
@@ -156,7 +158,7 @@ sub interface_state {
 		network_mask_str             => "255.255.255.0",
 		hellointerval                => $hello_interval,
 		options                      => 0x02,
-		rtr_pri		             => 1,
+		rtr_pri		             => $state{pri},
 		routerdeadinterval           => 4 * $hello_interval,
 		designated_router_str        => $state{dr},
 		backup_designated_router_str => $state{bdr},
@@ -180,6 +182,9 @@ sub runtest {
 
     $| = 1;
 
+    my $action = $self->{action};
+    $action->() if $action;
+
     foreach my $task (@tasks) {
 	print "Task: $task->{name}\n";
 	$check = $task->{check};
@@ -194,7 +199,7 @@ sub runtest {
 	}
 	$cv = AnyEvent->condvar;
 	$cv->recv;
-	my $action = $task->{action};
+	$action = $task->{action};
 	$action->() if $action;
     }
 
