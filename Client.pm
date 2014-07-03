@@ -162,7 +162,7 @@ sub interface_state {
 		routerdeadinterval           => 4 * $hello_interval,
 		designated_router_str        => $state{dr},
 		backup_designated_router_str => $state{bdr},
-		neighbors_str                => [ "$o_router_id" ],
+		neighbors_str                => $state{nbrs},
 	    );
 	    $handle->push_write(
 		construct_ether(\%ether,

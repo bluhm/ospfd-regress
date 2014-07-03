@@ -103,7 +103,7 @@ sub interface_state {
 		routerdeadinterval           => 4 * $hello_interval,
 		designated_router_str        => $state{dr},
 		backup_designated_router_str => $state{bdr},
-		neighbors_str                => [ "$o_router_id" ],
+		neighbors_str                => $state{nbrs},
 	    );
 	    $handle->push_write(
 		construct_ether(\%ether,
@@ -199,7 +199,7 @@ sub handle_ip4 {
 my @tasks = (
     {
 	name => "hello mit dr bdr 0.0.0.0 empfangen, ".
-	    "$t_router_id als neighbor eintragen",
+	    "$o_router_id als neighbor eintragen",
 	check => {
 	    dr  => "0.0.0.0",
 	    bdr => "0.0.0.0",
@@ -207,7 +207,7 @@ my @tasks = (
 	},
 	timeout => 3,  # hello interval + 1 second
 	action => sub {
-	    $is->{state}{nbrs} = [ "$t_router_id" ];
+	    $is->{nbrs} = [ "$o_router_id" ];
 	},
     },
     {

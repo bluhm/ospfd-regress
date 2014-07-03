@@ -25,7 +25,6 @@ PERLPATH =	${.CURDIR}/
 run-regress-$a: $a
 	@-${SUDO} ifconfig tun${TUNDEV} ${TUNIP} netmask 255.255.255.0 link0
 	time TUNDEV=${TUNDEV} TUNIP=${TUNIP} SUDO=${SUDO} KTRACE=${KTRACE} OSPFD=${OSPFD} perl ${PERLINC} ${PERLPATH}ospfd.pl ${PERLPATH}$a
-	@-${SUDO} ifconfig tun${TUNDEV} destroy
 .endfor
 
 # make perl syntax check for all args files
