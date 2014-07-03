@@ -32,14 +32,15 @@ use Packet;
 use Tun 'opentun';
 
 my $tun_device;
-my $area_id;
+my $area;
 my $hello_interval;
-# Parameters for test client
-my $c_mac_address;
-my $c_ospf_address;
-my $c_router_id;
-# Parameters for ospfd
-my $o_router_id;
+# Parameters for interface state machine of the test
+my $ism_mac;
+my $ism_ip;
+my $ism_rtrid;
+# Parameters for ospfd under test
+my $ospfd_ip;
+my $ospfd_rtrid;
 
 my $handle; 
 my $check;
@@ -50,13 +51,13 @@ my $ism;
 sub handle_arp {
     my %arp = consume_arp(\$handle->{rbuf});
     my %ether = (
-	src_str => $c_mac_address,
+	src_str => $ism_mac,
 	dst_str => $arp{sha_str},
 	type    => 0x0806,
     );
     $arp{op} = 2;
     @arp{qw(sha_str spa_str tha_str tpa_str)} =
-	($c_mac_address, @arp{qw(tpa_str sha_str spa_str)});
+	($ism_mac, @arp{qw(tpa_str sha_str spa_str)});
     $handle->push_write(
 	construct_ether(\%ether,
 	construct_arp(\%arp))
@@ -70,10 +71,10 @@ sub handle_ip {
 	return;
     }
     my %ospf = consume_ospf(\$handle->{rbuf});
-    $ospf{router_id_str} eq $o_router_id
-	or return "ospfd rtrid is $ospf{router_id_str}: expected $$o_router_id";
-    $ospf{area_id_str} eq $area_id
-	or return "ospfd area is $ospf{area_id_str}: expected $area_id";
+    $ospf{router_id_str} eq $ospfd_rtrid
+	or return "ospfd rtrid is $ospf{router_id_str}: expected $$ospfd_rtrid";
+    $ospf{area_id_str} eq $area
+	or return "ospfd area is $ospf{area_id_str}: expected $area";
     if ($ospf{type} == 1) {
 	handle_hello();
     } else {
@@ -135,7 +136,7 @@ sub interface_state_machine {
 	interval => $hello_interval,
 	cb => sub {
 	    my %ether = (
-		src_str => $c_mac_address,
+		src_str => $ism_mac,
 		dst_str => "01:00:5e:00:00:05",  # multicast ospf
 		type    => 0x0800,               # ipv4
 	    );
@@ -154,7 +155,7 @@ sub interface_state_machine {
 		version       => 2,         # ospf v2
 		type	      => 1,         # hello
 		router_id_str => $id,
-		area_id_str   => $area_id,
+		area_id_str   => $area,
 		autype        => 0,         # no authentication
 	    );
 	    my %hello = (
@@ -223,18 +224,19 @@ sub new {
 sub child {
     my $self = shift;
 
-    $area_id = $self->{area} or die "area id missing";
+    $area = $self->{area} or die "area id missing";
     $hello_interval = $self->{hello_intervall}
 	or die "hello_interval missing";
-    $c_mac_address = $self->{mac_address}
+    $ism_mac = $self->{mac_address}
 	or die "client mac address missing";
-    $c_ospf_address = $self->{ospf_address}
+    $ism_ip = $self->{ospf_address}
 	or die "client ospf address missing";
-    $c_router_id = $self->{router_id}
+    $ism_rtrid = $self->{router_id}
 	or die "client router id missing";
     $tun_device =  $self->{tun_device}
 	or die "tun device missing";
-    $o_router_id = $self->{ospfd_ip}
+    # XXX split ip and rtrid
+    $ospfd_ip = $ospfd_rtrid = $self->{ospfd_ip}
 	or die "ospfd ip missing";
 
     my $tun = opentun($tun_device);
@@ -265,7 +267,7 @@ sub child {
 	},
     );
 
-    $ism = interface_state_machine($c_router_id);
+    $ism = interface_state_machine($ism_rtrid);
 }
 
 1;

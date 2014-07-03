@@ -36,7 +36,7 @@ my $t_mac_address = "2:3:4:5:6:7";
 my $t_ospf_address = "10.188.6.18";
 my $t_router_id = "10.188.6.18";
 # Parameters for ospfd
-my $o_router_id = $ENV{TUNIP} || "10.188.6.17";
+my $ospfd_rtrid = $ENV{TUNIP} || "10.188.6.17";
 
 my $check;
 my $wait;
@@ -199,7 +199,7 @@ sub handle_ip {
 my @tasks = (
     {
 	name => "hello mit dr bdr 0.0.0.0 empfangen, ".
-	    "$o_router_id als neighbor eintragen",
+	    "$ospfd_rtrid als neighbor eintragen",
 	check => {
 	    dr  => "0.0.0.0",
 	    bdr => "0.0.0.0",
@@ -207,7 +207,7 @@ my @tasks = (
 	},
 	timeout => 3,  # hello interval + 1 second
 	action => sub {
-	    $is->{nbrs} = [ "$o_router_id" ];
+	    $is->{nbrs} = [ "$ospfd_rtrid" ];
 	},
     },
     {
@@ -222,12 +222,12 @@ my @tasks = (
 	timeout => 5,  # 2 * hello interval + 1 second
     },
     {
-	name => "warten dass dr $o_router_id ist",
+	name => "warten dass dr $ospfd_rtrid ist",
 	check => {
 	    nbrs => [ "$t_router_id" ],
 	},
 	wait => {
-	    dr  => "$o_router_id",
+	    dr  => "$ospfd_rtrid",
 	    bdr => "$t_router_id",
 	},
 	timeout => 11,  # dead interval + hello interval + 1 second
