@@ -235,9 +235,10 @@ sub child {
 	or die "client router id missing";
     $tun_number =  $self->{tun_number}
 	or die "tun device number missing";
-    # XXX split ip and rtrid
-    $ospfd_ip = $ospfd_rtrid = $self->{ospfd_ip}
+    $ospfd_ip = $self->{ospfd_ip}
 	or die "ospfd ip missing";
+    $ospfd_rtrid = $self->{ospfd_rtrid}
+	or die "ospfd router id missing";
 
     my $tun = opentun($tun_number);
 

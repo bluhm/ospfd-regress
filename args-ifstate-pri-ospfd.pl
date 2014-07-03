@@ -10,13 +10,14 @@ my $area = "10.188.0.0";
 my $hello_interval = 2;
 my $tun_number = $ENV{TUNDEV};
 my $ospfd_ip = $ENV{TUNIP};
+my $ospfd_rtrid = $ENV{RTRID};
 
 our %args = (
     ospfd => {
 	configtest => 0,
 	conf => {
 	    global => {
-		'router-id' => $ospfd_ip,
+		'router-id' => $ospfd_rtrid,
 	    },
 	    areas => {
 		$area => {
@@ -38,20 +39,21 @@ our %args = (
 	router_id => "10.188.6.18",
 	tun_number => $tun_number,
 	ospfd_ip => $ospfd_ip,
+	ospfd_rtrid => $ospfd_rtrid,
 	state => {
 	    pri => 0,
 	},
 	tasks => [
 	    {
 		name => "receive hello with dr 0.0.0.0 bdr 0.0.0.0, ".
-		    "enter 10.188.6.18 as our neighbor",
+		    "enter $ospfd_rtrid as our neighbor",
 		check => {
 		    dr   => "0.0.0.0",
 		    bdr  => "0.0.0.0",
 		    nbrs => [],
 		},
 		state => {
-		    nbrs => [ "10.188.6.17" ],
+		    nbrs => [ $ospfd_rtrid ],
 		},
 	    },
 	    {
@@ -67,12 +69,12 @@ our %args = (
 	    },
 	    {
 		name => "we are 2-way, wait for dr $ospfd_ip and ".
-		    "bdr 10.188.6.18 in received hello",
+		    "no bdr in received hello",
 		check => {
 		    nbrs => [ "10.188.6.18" ],
 		},
 		wait => {
-		    dr  => "$ospfd_ip",
+		    dr  => $ospfd_ip,
 		    bdr => "0.0.0.0"
 		},
 		timeout => 11,  # dead interval + hello interval + 1 second

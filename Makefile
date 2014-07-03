@@ -9,6 +9,7 @@ PERLHEADER !=		perl -MConfig -e 'print "$$Config{archlib}/CORE"'
 CLEANFILES +=		${XSFILES:S/.xs$/.c/} ${XSFILES:S/.xs$/.o/} ${XSFILES:S/.xs$/.so/}
 TUNDEV ?=		6
 TUNIP ?=		10.188.6.17
+RTRID ?=		10.188.0.17
 
 # Set variables so that make runs with and without obj directory.
 # Only do that if necessary to keep visible output short.
@@ -27,7 +28,7 @@ PERLPATH =	${.CURDIR}/
 .for a in ${ARGS}
 run-regress-$a: $a ${XSFILES:S/.xs$/.so/}
 	@-${SUDO} ifconfig tun${TUNDEV} ${TUNIP} netmask 255.255.255.0 link0
-	time TUNDEV=${TUNDEV} TUNIP=${TUNIP} SUDO=${SUDO} KTRACE=${KTRACE} OSPFD=${OSPFD} perl ${PERLINC} ${PERLPATH}ospfd.pl ${PERLPATH}$a
+	time TUNDEV=${TUNDEV} TUNIP=${TUNIP} RTRID=${RTRID} SUDO=${SUDO} KTRACE=${KTRACE} OSPFD=${OSPFD} perl ${PERLINC} ${PERLPATH}ospfd.pl ${PERLPATH}$a
 .endfor
 
 # make perl syntax check for all args files
