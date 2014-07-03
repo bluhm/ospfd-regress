@@ -203,13 +203,12 @@ sub ism_set_state {
 
 sub runtest {
     my $self = shift;
-    my @tasks = @{$self->{tasks}};
 
     $| = 1;
 
-    ism_set_state($self->{state});
+    ism_set_state($self->{state} || {});
 
-    foreach my $task (@tasks) {
+    foreach my $task (@{$self->{tasks}}) {
 	print "Task: $task->{name}\n";
 	$check = $task->{check};
 	$wait = $task->{wait};
