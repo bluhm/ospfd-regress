@@ -63,10 +63,10 @@ sub handle_arp {
     );
 }
 
-sub handle_ip4 {
-    my %ip4 = consume_ip4(\$handle->{rbuf});
-    unless ($ip4{p} == 89) {
-	warn "ip4 proto is not ospf";
+sub handle_ip {
+    my %ip = consume_ip(\$handle->{rbuf});
+    unless ($ip{p} == 89) {
+	warn "ip proto is not ospf";
 	return;
     }
     my %ospf = consume_ospf(\$handle->{rbuf});
@@ -139,7 +139,7 @@ sub interface_state_machine {
 		dst_str => "01:00:5e:00:00:05",  # multicast ospf
 		type    => 0x0800,               # ipv4
 	    );
-	    my %ip4 = (
+	    my %ip = (
 		v       => 4,               # ipv4
 		hlen    => 20,
 		tos     => 0xc0,
@@ -169,7 +169,7 @@ sub interface_state_machine {
 	    );
 	    $handle->push_write(
 		construct_ether(\%ether,
-		construct_ip4(\%ip4,
+		construct_ip(\%ip,
 		construct_ospf(\%ospf,
 		construct_hello(\%hello))))
 	    );
@@ -255,7 +255,7 @@ sub child {
 	on_read => sub {
 	    my %ether = consume_ether(\$handle->{rbuf});
 	    if ($ether{type} == 0x0800) {
-		handle_ip4();
+		handle_ip();
 	    } elsif ($ether{type} == 0x0806) {
 		handle_arp();
 	    } else {

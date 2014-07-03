@@ -54,12 +54,12 @@ my $handle; $handle = AnyEvent::Handle->new(
     on_read => sub {
 	my %ether = consume_ether(\$handle->{rbuf});
 	unless ($ether{type} == 0x0800) {
-	    warn "ether type is not ip4";
+	    warn "ether type is not ip";
 	    return;
 	}
-	my %ip4 = consume_ip4(\$handle->{rbuf});
-	unless ($ip4{p} == 89) {
-	    warn "ip4 proto is not ospf";
+	my %ip = consume_ip(\$handle->{rbuf});
+	unless ($ip{p} == 89) {
+	    warn "ip proto is not ospf";
 	    return;
 	}
 	my %ospf = consume_ospf(\$handle->{rbuf});
@@ -71,13 +71,13 @@ my $handle; $handle = AnyEvent::Handle->new(
 	$handle->{rbuf} = "";  # just to be sure, packets must not cumulate
 
 	$ether{src_str} = $mac_address;
-	$ip4{src_str} = $ospf_address;
+	$ip{src_str} = $ospf_address;
 	$ospf{router_id_str} = $router_id;
 	$hello{backup_designated_router_str} = $router_id;
 	$hello{neighbors_str} = [ "10.188.6.17" ];
 	$handle->push_write(
 	    construct_ether(\%ether,
-	    construct_ip4(\%ip4,
+	    construct_ip(\%ip,
 	    construct_ospf(\%ospf,
 	    construct_hello(\%hello))))
 	);

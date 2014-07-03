@@ -22,12 +22,12 @@ use Carp;
 our @EXPORT = qw(
     consume_ether
     consume_arp
-    consume_ip4
+    consume_ip
     consume_ospf
     consume_hello
     construct_ether
     construct_arp
-    construct_ip4
+    construct_ip
     construct_ospf
     construct_hello
 );
@@ -109,14 +109,14 @@ sub construct_arp {
     return $packet. $subpacket;
 }
 
-sub consume_ip4 {
+sub consume_ip {
     my $packet = shift;
 
     length($$packet) >= 20 or croak "ip packet too short: ". length($$packet);
-    my $ip4 = substr($$packet, 0, 20, "");
+    my $ip = substr($$packet, 0, 20, "");
     my %fields;
     @fields{qw(hlv tos len id off ttl p sum src dst)} =
-	unpack("C C n n n C C n a4 a4", $ip4);
+	unpack("C C n n n C C n a4 a4", $ip);
     $fields{hlen} = ($fields{hlv} & 0x0f) << 2;
     $fields{v} = ($fields{hlv} >> 4) & 0x0f;
 
@@ -132,18 +132,18 @@ sub consume_ip4 {
     return %fields;
 }
 
-sub construct_ip4 {
+sub construct_ip {
     my $fields = shift;
     my $subpacket = shift // "";
 
     $$fields{options} //= "";
 
     $$fields{hlen} = 20 + length($$fields{options});
-    $$fields{hlen} & 3 and croak "bad ip4 header length: $$fields{hlen}";
+    $$fields{hlen} & 3 and croak "bad ip header length: $$fields{hlen}";
     $$fields{hlen} < 20
-	and croak "ip4 header length too small: $$fields{hlen}";
+	and croak "ip header length too small: $$fields{hlen}";
     ($$fields{hlen} >> 2) > 0x0f
-	and croak "ip4 header length too big: $$fields{hlen}";
+	and croak "ip header length too big: $$fields{hlen}";
     $$fields{v} = 4;
     $$fields{hlv} =
 	(($$fields{v} << 4) & 0xf0) | (($$fields{hlen} >> 2) & 0x0f);
