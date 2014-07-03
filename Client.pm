@@ -31,7 +31,7 @@ use AnyEvent::Strict;
 use Packet;
 use Tun 'opentun';
 
-my $tun_device = $ENV{TUNDEV} || 5;
+my $tun_device;
 my $area_id;
 my $hello_interval;
 # Parameters for test client
@@ -39,7 +39,7 @@ my $c_mac_address;
 my $c_ospf_address;
 my $c_router_id;
 # Parameters for ospfd
-my $o_router_id = $ENV{TUNIP} || "10.188.6.17";
+my $o_router_id;
 
 my $handle; 
 my $check;
@@ -223,6 +223,10 @@ sub child {
 	or die "client ospf address missing";
     $c_router_id = $self->{router_id}
 	or die "client router id missing";
+    $tun_device =  $self->{tun_device}
+	or die "tun device missing";
+    $o_router_id = $self->{ospfd_ip}
+	or die "ospfd ip missing";
 
     my $tun = opentun($tun_device);
 
