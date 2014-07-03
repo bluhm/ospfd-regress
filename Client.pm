@@ -126,12 +126,20 @@ sub handle_hello {
     }
 }
 
+my $ism_count = 0;
 sub interface_state_machine {
     my %state = (
 	dr  => "0.0.0.0",
 	bdr => "0.0.0.0",
 	pri => 1,
     );
+
+    # increment the ip address and router id for each instance of ism
+    my $ip_number = unpack("N", pack("C4", split(/\./, $ism_ip)));
+    my $ip = join(".", unpack("C4", pack("N", $ip_number + $ism_count)));
+    my $rtrid_number = unpack("N", pack("C4", split(/\./, $ism_rtrid)));
+    my $rtrid = join(".", unpack("C4", pack("N", $rtrid_number + $ism_count)));
+    $ism_count++;
 
     my $hello_count = 0;
     $state{timer} = AnyEvent->timer(
@@ -151,13 +159,13 @@ sub interface_state_machine {
 		off     => 0,               # no fragment
 		ttl     => 1,               # only for direct connected
 		p       => 89,              # protocol ospf
-		src_str => $ism_ip,
+		src_str => $ip,
 		dst_str => "224.0.0.5",     # all ospf router multicast
 	    );
 	    my %ospf = (
 		version       => 2,           # ospf v2
 		type	      => 1,           # hello
-		router_id_str => $ism_rtrid,
+		router_id_str => $rtrid,
 		area_id_str   => $area,
 		autype        => 0,           # no authentication
 	    );
