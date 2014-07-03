@@ -4,7 +4,7 @@ ARGS !=			cd ${.CURDIR} && ls args-*.pl
 TARGETS ?=		${ARGS}
 REGRESS_TARGETS =	${TARGETS:S/^/run-regress-/}
 CLEANFILES +=		*.log ospfd.conf ktrace.out stamp-*
-TUNDEV ?=		5
+TUNDEV ?=		6
 TUNIP ?=		10.188.6.17
 
 # Set variables so that make runs with and without obj directory.

@@ -28,7 +28,7 @@ use AnyEvent::Strict;
 use Packet;
 use Tun 'opentun';
 
-my $tun_device = $ENV{TUNDEV} || 5;
+my $tun_device = $ENV{TUNDEV} || 6;
 my $area_id = "10.188.0.0";
 my $hello_interval = 2;
 # Parameters for test client
