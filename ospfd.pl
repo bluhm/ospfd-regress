@@ -22,15 +22,15 @@ use Ospfd;
 use Client;
 
 sub usage {
-	die "usage: ospf.pl [test-args.pl]\n";
+    die "usage: ospf.pl [test-args.pl]\n";
 }
 
 my $test;
 our %args;
 if (@ARGV and -f $ARGV[-1]) {
-	$test = pop;
-	do $test
-	    or die "Do test file $test failed: ", $@ || $!;
+    $test = pop;
+    do $test
+	or die "Do test file $test failed: ", $@ || $!;
 }
 @ARGV == 0 or usage();
 
@@ -42,11 +42,11 @@ my $o = Ospfd->new(
 $o->run;
 $o->up;
 if ($args{client}) {
-	my $c = Client->new(
-	    %{$args{client}},
-	);
-	$c->run;
-	$c->down;
+    my $c = Client->new(
+	%{$args{client}},
+    );
+    $c->run;
+    $c->down;
 }
 $o->kill_child;
 $o->down;
