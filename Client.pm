@@ -31,15 +31,15 @@ use AnyEvent::Strict;
 use Packet;
 use Tun 'opentun';
 
-my $tun_device = $ENV{TUNDEV} ? "/dev/$ENV{TUNDEV}" : "/dev/tun5";
-my $area_id = "10.188.0.0";
-my $hello_interval = 2;
+my $tun_device;
+my $area_id;
+my $hello_interval;
 # Parameters for test client
-my $t_mac_address = "2:3:4:5:6:7";
-my $t_ospf_address = "10.188.6.18";
-my $t_router_id = "10.188.6.18";
+my $c_mac_address;
+my $c_ospf_address;
+my $c_router_id;
 # Parameters for ospfd
-my $o_router_id = $ENV{TUNIP} || "10.188.6.17";
+my $o_router_id;
 
 my $handle; 
 my $check;
@@ -50,13 +50,13 @@ my $is;
 sub handle_arp {
     my %arp = consume_arp(\$handle->{rbuf});
     my %ether = (
-	src_str => $t_mac_address,
+	src_str => $c_mac_address,
 	dst_str => $arp{sha_str},
 	type    => 0x0806,
     );
     $arp{op} = 2;
     @arp{qw(sha_str spa_str tha_str tpa_str)} =
-	($t_mac_address, @arp{qw(tpa_str sha_str spa_str)});
+	($c_mac_address, @arp{qw(tpa_str sha_str spa_str)});
     $handle->push_write(
 	construct_ether(\%ether,
 	construct_arp(\%arp))
@@ -130,7 +130,7 @@ sub interface_state {
 	interval => $hello_interval,
 	cb => sub {
 	    my %ether = (
-		src_str => $t_mac_address,
+		src_str => $c_mac_address,
 		dst_str => "01:00:5e:00:00:05",  # multicast ospf
 		type    => 0x0800,               # ipv4
 	    );
@@ -204,7 +204,7 @@ sub runtest {
 
 sub new {
     my ($class, %args) = @_;
-    $args{logfile} ||= "client.log";
+    $args{logfile} ||= "client_$args{router_id}.log";
     $args{up} = "Starting test client";
     $args{down} = "Terminating";
     $args{func} = \&runtest;
@@ -213,8 +213,23 @@ sub new {
 }
 
 sub child {
-    (my $tun_number = $tun_device) =~ s/\D*//;
-    my $tun = opentun($tun_number);
+    my $self = shift;
+
+    $area_id = $self->{area} or die "area id missing";
+    $hello_interval = $self->{hello_intervall}
+	or die "hello_interval missing";
+    $c_mac_address = $self->{mac_address}
+	or die "client mac address missing";
+    $c_ospf_address = $self->{ospf_address}
+	or die "client ospf address missing";
+    $c_router_id = $self->{router_id}
+	or die "client router id missing";
+    $tun_device =  $self->{tun_device}
+	or die "tun device missing";
+    $o_router_id = $self->{ospfd_ip}
+	or die "ospfd ip missing";
+
+    my $tun = opentun($tun_device);
 
     $handle = AnyEvent::Handle->new(
 	fh => $tun,
@@ -242,7 +257,7 @@ sub child {
 	},
     );
 
-    $is = interface_state($t_router_id);
+    $is = interface_state($c_router_id);
 }
 
 1;

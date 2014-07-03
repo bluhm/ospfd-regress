@@ -2,18 +2,23 @@ use strict;
 use warnings;
 use Client;
 
+my $area = "10.188.0.0";
+my $hello_interval = 2;
+my $tun_device = $ENV{TUNDEV};
+my $ospfd_ip = $ENV{TUNIP};
+
 our %args = (
     ospfd => {
 	configtest => 0,
 	conf => {
 	    global => {
-		'router-id' => $ENV{TUNIP},
+		'router-id' => $ospfd_ip,
 	    },
 	    areas => {
-		'10.188.0.0' => {
-		    "$ENV{TUNDEV}:$ENV{TUNIP}" => {
+		$area => {
+		    "tun$tun_device:$ospfd_ip" => {
 			'metric' => '15',
-			'hello-interval' => '2',
+			'hello-interval' => $hello_interval,
 			'router-dead-time' => '8',
 			'router-priority' => '15',
 		    },
@@ -22,6 +27,13 @@ our %args = (
 	},
     },
     client => {
+	area => $area,
+	hello_intervall => $hello_interval,
+	mac_address => "2:3:4:5:6:7",
+	ospf_address => "10.188.6.18",
+	router_id => "10.188.6.18",
+	tun_device => $tun_device,
+	ospfd_ip => $ospfd_ip,
 	tasks => [
 	    {
 		name => "hello mit dr bdr 0.0.0.0 empfangen, ".
@@ -48,12 +60,12 @@ our %args = (
 		timeout => 5,  # 2 * hello interval + 1 second
 	    },
 	    {
-		name => "warten dass dr 10.188.6.17 ist",
+		name => "warten dass dr $ospfd_ip ist",
 		check => {
 		    nbrs => [ "10.188.6.18" ],
 		},
 		wait => {
-		    dr  => "10.188.6.17",
+		    dr  => "$ospfd_ip",
 		    bdr => "10.188.6.18",
 		},
 		timeout => 11,  # dead interval + hello interval + 1 second

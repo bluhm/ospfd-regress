@@ -28,7 +28,7 @@ use AnyEvent::Strict;
 use Packet;
 use Tun 'opentun';
 
-my $tun_device = $ENV{TUNDEV} ? "/dev/$ENV{TUNDEV}" : "/dev/tun5";
+my $tun_device = $ENV{TUNDEV} || 5;
 my $area_id = "10.188.0.0";
 my $hello_interval = 2;
 # Parameters for test client
@@ -42,8 +42,7 @@ my $check;
 my $wait;
 my $cv;
 
-(my $tun_number = $tun_device) =~ s/\D*//;
-my $tun = opentun($tun_number);
+my $tun = opentun($tun_device);
 
 my $handle; $handle = AnyEvent::Handle->new(
     fh => $tun,
