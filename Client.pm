@@ -203,7 +203,7 @@ sub runtest {
 
 sub new {
     my ($class, %args) = @_;
-    $args{logfile} ||= "client.log";
+    $args{logfile} ||= "client_$args{router_id}.log";
     $args{up} = "Starting test client";
     $args{down} = "Terminating";
     $args{func} = \&runtest;
