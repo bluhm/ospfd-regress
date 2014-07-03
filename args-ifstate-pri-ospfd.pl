@@ -36,7 +36,7 @@ our %args = (
 	hello_intervall => $hello_interval,
 	mac_address => "2:3:4:5:6:7",
 	ospf_address => "10.188.6.18",
-	router_id => "10.188.6.18",
+	router_id => "10.188.0.18",
 	tun_number => $tun_number,
 	ospfd_ip => $ospfd_ip,
 	ospfd_rtrid => $ospfd_rtrid,
@@ -57,13 +57,13 @@ our %args = (
 		},
 	    },
 	    {
-		name => "wait for neighbor 10.188.6.18 in received hello",
+		name => "wait for neighbor 10.188.0.18 in received hello",
 		check => {
 		    dr  => "0.0.0.0",
 		    bdr => "0.0.0.0",
 		},
 		wait => {
-		    nbrs => [ "10.188.6.18" ],
+		    nbrs => [ "10.188.0.18" ],
 		},
 		timeout => 5,  # 2 * hello interval + 1 second
 	    },
@@ -71,7 +71,7 @@ our %args = (
 		name => "we are 2-way, wait for dr $ospfd_ip and ".
 		    "no bdr in received hello",
 		check => {
-		    nbrs => [ "10.188.6.18" ],
+		    nbrs => [ "10.188.0.18" ],
 		},
 		wait => {
 		    dr  => $ospfd_ip,
