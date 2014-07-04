@@ -139,7 +139,7 @@ sub loggrep {
 
 	do {
 		my($kid, $status, $code) = $self->wait(WNOHANG);
-		if ($kid > 0 && $status != 0 && !$self->{configtest}) {
+		if ($kid > 0 && $status != 0) {
 			# child terminated with failure
 			die ref($self), " child status: $status $code";
 		}
@@ -173,7 +173,6 @@ sub up {
 sub down {
 	my $self = shift;
 	my $timeout = shift || 30;
-	return $self if ($self->{configtest});
 	$self->loggrep(qr/$self->{down}/, $timeout)
 	    or croak ref($self), " no $self->{down} in $self->{logfile} ".
 		"after $timeout seconds";

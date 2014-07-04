@@ -24,18 +24,15 @@ use File::Basename;
 sub new {
 	my $class = shift;
 	my %args = @_;
+	$args{logfile} ||= "ospfd.log";
 	$args{up} ||= "Started";
 	$args{down} ||= "terminating";
 	$args{func} = sub { Carp::confess "$class func may not be called" };
 	$args{conffile} ||= "ospfd.conf";
-	$args{logfile} ||= "ospfd.log";
-	my @sudo = $ENV{SUDO} ? $ENV{SUDO} : ();
 	my $self = Proc::new($class, %args);
+
 	# generate ospfd.conf from config keys in %args
-	if (-e $self->{conffile}) {
-		my @cmd = (@sudo, "rm", $self->{conffile});
-		system(@cmd) == 0 or die "system(@cmd) failed";
-	}
+	unlink $self->{conffile};
 	open(my $fh, '>', $self->{conffile})
 	    or die ref($self), " conf file $self->{conffile} create failed: $!";
 	my %global_conf = %{$args{conf}{global}};
@@ -57,8 +54,10 @@ sub new {
 	}
 	close $fh;
 	chmod(0600, $self->{conffile});
-	my @cmd = (@sudo, "chown", "root:wheel", $self->{conffile});
-	system(@cmd) == 0 or die "system(@cmd) failed";
+	my @sudo = $ENV{SUDO} ? $ENV{SUDO} : ();
+	my @cmd = (@sudo, "/sbin/chown", "0:0", $self->{conffile});
+	system(@cmd)
+	    and die "System '@cmd' failed: $?";
 
 	return $self;
 }
@@ -66,7 +65,7 @@ sub new {
 sub up {
 	my $self = Proc::up(shift, @_);
 	my $timeout = shift || 10;
-	my $regex = $self->{configtest} ? "router-id" : "startup";
+	my $regex = "startup";
 	$self->loggrep(qr/$regex/, $timeout)
 	    or croak ref($self), " no $regex in $self->{logfile} ".
 		"after $timeout seconds";
@@ -80,7 +79,6 @@ sub child {
 	my @ktrace = $ENV{KTRACE} ? ($ENV{KTRACE}, "-i") : ();
 	my $ospfd = $ENV{OSPFD} ? $ENV{OSPFD} : "ospfd";
 	my @cmd = (@sudo, @ktrace, $ospfd, '-d', '-v', '-f', $self->{conffile});
-	push @cmd, '-n' if ($self->{configtest});
 	print STDERR "execute: @cmd\n";
 	exec @cmd;
 	die "Exec @cmd failed: $!";
