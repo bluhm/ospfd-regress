@@ -38,6 +38,11 @@ our $ospfd_rtrid = $ENV{RTRID};
 our %default_args = (
     ospfd => {
 	configtest => 0,
+	conf => {
+	    global => {
+		'router-id' => $ospfd_rtrid,
+	    },
+	},
     },
 );
 

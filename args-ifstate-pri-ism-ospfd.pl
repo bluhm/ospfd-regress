@@ -5,20 +5,11 @@
 use strict;
 use warnings;
 use Client;
-use Default '$area';
-
-my $hello_interval = 2;
-my $tun_number = $ENV{TUNDEV};
-my $ospfd_ip = $ENV{TUNIP};
-my $ospfd_rtrid = $ENV{RTRID};
+use Default qw($area $hello_interval $tun_number $ospfd_ip $ospfd_rtrid);
 
 our %tst_args = (
     ospfd => {
-	configtest => 0,
 	conf => {
-	    global => {
-		'router-id' => $ospfd_rtrid,
-	    },
 	    areas => {
 		$area => {
 		    "tun$tun_number:$ospfd_ip" => {
