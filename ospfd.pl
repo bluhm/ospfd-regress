@@ -26,7 +26,7 @@ sub usage {
 }
 
 my $test;
-our %args;
+our %tst_args;
 if (@ARGV and -f $ARGV[-1]) {
     $test = pop;
     do $test
@@ -35,15 +35,14 @@ if (@ARGV and -f $ARGV[-1]) {
 @ARGV == 0 or usage();
 
 my $o = Ospfd->new(
-    %{$args{ospfd}},
-    testfile            => $test,
+    %{$tst_args{ospfd}},
 );
 
 $o->run;
 $o->up;
-if ($args{client}) {
+if ($tst_args{client}) {
     my $c = Client->new(
-	%{$args{client}},
+	%{$tst_args{client}},
     );
     $c->run;
     $c->down;

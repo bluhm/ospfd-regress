@@ -12,7 +12,7 @@ my $tun_number = $ENV{TUNDEV};
 my $ospfd_ip = $ENV{TUNIP};
 my $ospfd_rtrid = $ENV{RTRID};
 
-our %args = (
+our %tst_args = (
     ospfd => {
 	configtest => 0,
 	conf => {
