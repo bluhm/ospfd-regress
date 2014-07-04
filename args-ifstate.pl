@@ -6,9 +6,6 @@ use Default qw($area $hello_interval $tun_number $ospfd_ip $ospfd_rtrid);
 our %tst_args = (
     ospfd => {
 	conf => {
-	    global => {
-		'router-id' => $ospfd_rtrid,
-	    },
 	    areas => {
 		$area => {
 		    "tun$tun_number:$ospfd_ip" => {
@@ -22,14 +19,6 @@ our %tst_args = (
 	},
     },
     client => {
-	area => $area,
-	hello_intervall => $hello_interval,
-	mac_address => "2:3:4:5:6:7",
-	ospf_address => "10.188.6.18",
-	router_id => "10.188.0.18",
-	tun_number => $tun_number,
-	ospfd_ip => $ospfd_ip,
-	ospfd_rtrid => $ospfd_rtrid,
 	tasks => [
 	    {
 		name => "receive hello with dr 0.0.0.0 bdr 0.0.0.0, ".
