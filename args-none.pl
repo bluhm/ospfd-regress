@@ -4,7 +4,7 @@
 use strict;
 use warnings;
 use Client;
-use Defaults '$area';
+use Default '$area';
 
 my $hello_interval = 2;
 my $tun_number = $ENV{TUNDEV};
