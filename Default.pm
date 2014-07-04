@@ -18,37 +18,21 @@
 use strict;
 use warnings;
 
-use Ospfd;
-use Client;
-use Hash::Merge 'merge';
-use Default '%default_args';
+package Default;
+use parent qw( Exporter );
+our @ISA = qw( Exporter );
 
-sub usage {
-    die "usage: ospf.pl [test-args.pl]\n";
-}
-
-my $test;
-our %tst_args;
-if (@ARGV and -f $ARGV[-1]) {
-    $test = pop;
-    do $test
-	or die "Do test file $test failed: ", $@ || $!;
-}
-@ARGV == 0 or usage();
-my $args = merge(\%default_args, \%tst_args);
-
-my $o = Ospfd->new(
-    %{$args->{ospfd}},
+our @EXPORT = qw(
+    %default_args
+    $area
 );
 
-$o->run;
-$o->up;
-if ($args->{client}) {
-    my $c = Client->new(
-	%{$args->{client}},
-    );
-    $c->run;
-    $c->down;
-}
-$o->kill_child;
-$o->down;
+our $area = "10.188.0.0";
+
+our %default_args = (
+    ospfd => {
+	configtest => 0,
+    },
+);
+
+1;
