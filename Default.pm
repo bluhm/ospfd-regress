@@ -22,7 +22,6 @@ our @ISA = qw( Exporter );
 
 our @EXPORT = qw(
     $area
-    $hello_interval
     $tun_number
     $ospfd_ip
     $ospfd_rtrid
@@ -30,11 +29,11 @@ our @EXPORT = qw(
 );
 
 our $area = "10.188.0.0";
-our $hello_interval = 2;
 our $tun_number = $ENV{TUNDEV};
 our $ospfd_ip = $ENV{TUNIP};
 our $ospfd_rtrid = $ENV{RTRID};
 
+my $hello_interval = 2;
 our %default_args = (
     ospfd => {
 	configtest => 0,

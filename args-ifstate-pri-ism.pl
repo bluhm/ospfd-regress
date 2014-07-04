@@ -5,7 +5,7 @@
 use strict;
 use warnings;
 use Client;
-use Default qw($area $hello_interval $tun_number $ospfd_ip $ospfd_rtrid);
+use Default qw($area $tun_number $ospfd_ip $ospfd_rtrid);
 
 our %tst_args = (
     ospfd => {
