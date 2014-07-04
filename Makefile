@@ -52,9 +52,9 @@ run-regress-$a: $a opentun stamp-passfd
 
 syntax: stamp-syntax
 
-stamp-syntax: ${ARGS}
+stamp-syntax: ${ARGS} passfd
 .for a in ${ARGS}
-	@perl -c ${PERLPATH}$a
+	@perl ${PERLINC} -c ${PERLPATH}$a
 .endfor
 	@date >$@
 
