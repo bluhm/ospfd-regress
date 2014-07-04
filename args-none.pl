@@ -4,8 +4,8 @@
 use strict;
 use warnings;
 use Client;
+use Defaults '$area';
 
-my $area = "10.188.0.0";
 my $hello_interval = 2;
 my $tun_number = $ENV{TUNDEV};
 my $ospfd_ip = $ENV{TUNIP};
