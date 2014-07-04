@@ -42,6 +42,16 @@ our %default_args = (
 	    global => {
 		'router-id' => $ospfd_rtrid,
 	    },
+	    areas => {
+		$area => {
+		    "tun$tun_number:$ospfd_ip" => {
+			'metric' => '15',
+			'hello-interval' => $hello_interval,
+			'router-dead-time' => 4 * $hello_interval,
+			'router-priority' => '15',
+		    },
+		},
+	    },
 	},
     },
     client => {

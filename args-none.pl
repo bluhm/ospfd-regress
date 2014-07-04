@@ -7,20 +7,6 @@ use Client;
 use Default qw($area $hello_interval $tun_number $ospfd_ip $ospfd_rtrid);
 
 our %tst_args = (
-    ospfd => {
-	conf => {
-	    areas => {
-		$area => {
-		    "tun$tun_number:$ospfd_ip" => {
-			'metric' => '15',
-			'hello-interval' => $hello_interval,
-			'router-dead-time' => '8',
-			'router-priority' => '15',
-		    },
-		},
-	    },
-	},
-    },
     client => {
 	state => [],
 	tasks => [

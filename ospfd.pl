@@ -35,7 +35,7 @@ if (@ARGV and -f $ARGV[-1]) {
 	or die "Do test file $test failed: ", $@ || $!;
 }
 @ARGV == 0 or usage();
-my $args = merge(\%default_args, \%tst_args);
+my $args = merge(\%tst_args, \%default_args);
 
 my $o = Ospfd->new(
     %{$args->{ospfd}},

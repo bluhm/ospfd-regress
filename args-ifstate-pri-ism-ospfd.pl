@@ -13,9 +13,6 @@ our %tst_args = (
 	    areas => {
 		$area => {
 		    "tun$tun_number:$ospfd_ip" => {
-			'metric' => '15',
-			'hello-interval' => $hello_interval,
-			'router-dead-time' => '8',
 			'router-priority' => '1',
 		    },
 		},
