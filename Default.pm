@@ -44,6 +44,16 @@ our %default_args = (
 	    },
 	},
     },
+    client => {
+	mac_address => "2:3:4:5:6:7",
+	ospf_address => "10.188.6.18",
+	router_id => "10.188.0.18",
+    	area => $area,
+	hello_intervall => $hello_interval,
+	tun_number => $tun_number,
+	ospfd_ip => $ospfd_ip,
+	ospfd_rtrid => $ospfd_rtrid,
+    },
 );
 
 1;
