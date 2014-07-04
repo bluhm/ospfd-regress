@@ -66,6 +66,7 @@ passfd: stamp-passfd
 
 stamp-passfd: PassFd.so
 	perl ${PERLINC} ${PERLPATH}testfd.pl
+	@date >$@
 
 .SUFFIXES: .xs .so
 
