@@ -37,18 +37,16 @@ if (@ARGV and -f $ARGV[-1]) {
 @ARGV == 0 or usage();
 my $args = merge(\%tst_args, \%default_args);
 
-my $o = Ospfd->new(
+my $ospfd = Ospfd->new(
     %{$args->{ospfd}},
 );
+my $client = Client->new(
+    %{$args->{client}},
+);
 
-$o->run;
-$o->up;
-if ($args->{client}) {
-    my $c = Client->new(
-	%{$args->{client}},
-    );
-    $c->run;
-    $c->down;
-}
-$o->kill_child;
-$o->down;
+$ospfd->run;
+$ospfd->up;
+$client->run;
+$client->down;
+$ospfd->kill_child;
+$ospfd->down;
