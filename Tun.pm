@@ -43,7 +43,17 @@ sub opentun {
 	    "set the SUDO environment variable and allow closefrom_override.\n";
     }
 
+    my $opentun;
     my $curdir = dirname($0) || ".";
+    if (-x "$curdir/opentun") {
+	$opentun = "$curdir/opentun";
+    } elsif (-x "./opentun") {
+	$opentun = "./opentun";
+    } else {
+	die "To open the device $tun_device the tool opentun is needed.\n".
+	    "Executable opentun not found in $curdir or current directory.\n";
+    }
+
     socketpair(my $parent, my $child, AF_UNIX, SOCK_STREAM, PF_UNSPEC)
 	or croak "Socketpair failed: $!";
     $child->fcntl(F_SETFD, 0)
@@ -58,7 +68,7 @@ sub opentun {
 	    warn "Close parent socket failed: $!";
 	    _exit(3);
 	};
-	my @cmd = ($ENV{SUDO}, '-C', $child->fileno()+1, "$curdir/opentun",
+	my @cmd = ($ENV{SUDO}, '-C', $child->fileno()+1, $opentun,
 	    $child->fileno(), $tun_number);
 	exec(@cmd);
 	warn "Exec '@cmd' failed: $!";
