@@ -1,5 +1,3 @@
-#!/usr/bin/perl
-
 # Copyright (c) 2010-2014 Alexander Bluhm <bluhm@openbsd.org>
 # Copyright (c) 2014 Florian Riehm <mail@friehm.de>
 #
@@ -23,11 +21,19 @@ use parent qw( Exporter );
 our @ISA = qw( Exporter );
 
 our @EXPORT = qw(
-    %default_args
     $area
+    $hello_interval
+    $tun_number
+    $ospfd_ip
+    $ospfd_rtrid
+    %default_args
 );
 
 our $area = "10.188.0.0";
+our $hello_interval = 2;
+our $tun_number = $ENV{TUNDEV};
+our $ospfd_ip = $ENV{TUNIP};
+our $ospfd_rtrid = $ENV{RTRID};
 
 our %default_args = (
     ospfd => {
