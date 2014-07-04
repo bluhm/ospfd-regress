@@ -19,9 +19,8 @@ ARGS !=			cd ${.CURDIR} && ls args-*.pl
 TARGETS ?=		${ARGS}
 REGRESS_TARGETS =	${TARGETS:S/^/run-regress-/}
 CLEANFILES +=		*.log ospfd.conf ktrace.out stamp-* opentun
-XSFILES =		PassFd.xs
 PERLHEADER !=		perl -MConfig -e 'print "$$Config{archlib}/CORE"'
-CLEANFILES +=		${XSFILES:S/.xs$/.c/} ${XSFILES:S/.xs$/.o/} ${XSFILES:S/.xs$/.so/}
+CLEANFILES +=		PassFd.c PassFd.o PassFd.so
 TUNDEV ?=		6
 TUNIP ?=		10.188.6.17
 RTRID ?=		10.188.0.17
@@ -42,7 +41,7 @@ PERLPATH =	${.CURDIR}/
 # test parameters.
 
 .for a in ${ARGS}
-run-regress-$a: $a opentun ${XSFILES:S/.xs$/.so/}
+run-regress-$a: $a opentun stamp-passfd
 	@-${SUDO} ifconfig tun${TUNDEV} ${TUNIP} netmask 255.255.255.0 link0
 	time TUNDEV=${TUNDEV} TUNIP=${TUNIP} RTRID=${RTRID} SUDO=${SUDO} KTRACE=${KTRACE} OSPFD=${OSPFD} perl ${PERLINC} ${PERLPATH}ospfd.pl ${PERLPATH}$a
 .endfor
@@ -59,11 +58,20 @@ stamp-syntax: ${ARGS}
 .endfor
 	@date >$@
 
+# build and test file descriptor passing perl xs module
+
+.PHONY: passfd
+
+passfd: stamp-passfd
+
+stamp-passfd: PassFd.so
+	perl ${PERLINC} ${PERLPATH}testfd.pl
+
 .SUFFIXES: .xs .so
 
 .xs.so:
 	xsubpp -prototypes $> >${@:S/.so$/.c/}
 	gcc -shared -Wall -I${PERLHEADER} -o $@ ${@:S/.so$/.c/}
-	perl -M${@:R} -e ''
+	perl ${PERLINC} -M${@:R} -e ''
 
 .include <bsd.regress.mk>
