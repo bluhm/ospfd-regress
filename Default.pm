@@ -37,7 +37,6 @@ our $ospfd_rtrid = $ENV{RTRID};
 
 our %default_args = (
     ospfd => {
-	configtest => 0,
     },
 );
 

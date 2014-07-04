@@ -5,7 +5,6 @@ use Default qw($area $hello_interval $tun_number $ospfd_ip $ospfd_rtrid);
 
 our %tst_args = (
     ospfd => {
-	configtest => 0,
 	conf => {
 	    global => {
 		'router-id' => $ospfd_rtrid,
