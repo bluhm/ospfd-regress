@@ -1,3 +1,18 @@
+# The following ports must be installed for the regression tests:
+# p5-AnyEvent		provide framework for multiple event loops
+#
+# Check wether all required perl packages are installed.  If some
+# are missing print a warning and skip the tests, but do not fail.
+
+PERL_REQUIRE != perl -Mstrict -Mwarnings -e ' \
+    eval { require AnyEvent } or print $@; \
+'
+.if ! empty (PERL_REQUIRE)
+regress:
+	@echo "${PERL_REQUIRE}"
+	@echo install these perl packages for additional tests
+.endif
+
 # Automatically generate regress targets from test cases in directory.
 
 ARGS !=			cd ${.CURDIR} && ls args-*.pl
