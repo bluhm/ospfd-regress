@@ -14,6 +14,12 @@ regress:
 	@echo install these perl packages for additional tests
 .endif
 
+# Fill out these variables with you own system parameters
+
+TUNNUM ?=		6
+TUNIP ?=		10.188.6.17
+RTRID ?=		10.188.0.17
+
 # Automatically generate regress targets from test cases in directory.
 
 ARGS !=			cd ${.CURDIR} && ls args-*.pl
@@ -22,9 +28,6 @@ REGRESS_TARGETS =	${TARGETS:S/^/run-regress-/}
 CLEANFILES +=		*.log ospfd.conf ktrace.out stamp-* opentun
 PERLHEADER !=		perl -MConfig -e 'print "$$Config{archlib}/CORE"'
 CLEANFILES +=		PassFd.c PassFd.o PassFd.so
-TUNNUM ?=		6
-TUNIP ?=		10.188.6.17
-RTRID ?=		10.188.0.17
 CFLAGS =		-Wall
 
 # Set variables so that make runs with and without obj directory.
