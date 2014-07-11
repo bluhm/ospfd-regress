@@ -22,7 +22,7 @@ REGRESS_TARGETS =	${TARGETS:S/^/run-regress-/}
 CLEANFILES +=		*.log ospfd.conf ktrace.out stamp-* opentun
 PERLHEADER !=		perl -MConfig -e 'print "$$Config{archlib}/CORE"'
 CLEANFILES +=		PassFd.c PassFd.o PassFd.so
-TUNDEV ?=		6
+TUNNUM ?=		6
 TUNIP ?=		10.188.6.17
 RTRID ?=		10.188.0.17
 CFLAGS =		-Wall
@@ -44,8 +44,8 @@ PERLPATH =	${.CURDIR}/
 .for a in ${ARGS}
 run-regress-$a: $a opentun PassFd.so
 	@echo '\n======== $@ ========'
-	@-${SUDO} ifconfig tun${TUNDEV} ${TUNIP} netmask 255.255.255.0 link0
-	time TUNDEV=${TUNDEV} TUNIP=${TUNIP} RTRID=${RTRID} SUDO=${SUDO} KTRACE=${KTRACE} OSPFD=${OSPFD} perl ${PERLINC} ${PERLPATH}ospfd.pl ${PERLPATH}$a
+	@-${SUDO} ifconfig tun${TUNNUM} ${TUNIP} netmask 255.255.255.0 link0
+	time TUNNUM=${TUNNUM} TUNIP=${TUNIP} RTRID=${RTRID} SUDO=${SUDO} KTRACE=${KTRACE} OSPFD=${OSPFD} perl ${PERLINC} ${PERLPATH}ospfd.pl ${PERLPATH}$a
 .endfor
 
 # make perl syntax check for all args files

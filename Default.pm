@@ -29,7 +29,7 @@ our @EXPORT = qw(
 );
 
 our $area = "10.188.0.0";
-our $tun_number = $ENV{TUNDEV};
+our $tun_number = $ENV{TUNNUM};
 our $ospfd_ip = $ENV{TUNIP};
 our $ospfd_rtrid = $ENV{RTRID};
 
