@@ -1,5 +1,6 @@
 # The following ports must be installed for the regression tests:
 # p5-AnyEvent		provide framework for multiple event loops
+# p5-Hash-Merge		merge associative arrays
 #
 # Check wether all required perl packages are installed.  If some
 # are missing print a warning and skip the tests, but do not fail.
