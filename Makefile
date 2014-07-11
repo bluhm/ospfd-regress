@@ -67,9 +67,9 @@ run-regress-$a: $a opentun PassFd.so
 
 syntax: stamp-syntax
 
-stamp-syntax: ${ARGS} passfd
+stamp-syntax: ${ARGS} stamp-passfd
 .for a in ${ARGS}
-	@perl ${PERLINC} -c ${PERLPATH}$a
+	@TUNNUM=${TUNNUM} TUNIP=${TUNIP} RTRID=${RTRID} perl ${PERLINC} -c ${PERLPATH}$a
 .endfor
 	@date >$@
 
