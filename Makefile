@@ -42,6 +42,7 @@ PERLPATH =	${.CURDIR}/
 
 .for a in ${ARGS}
 run-regress-$a: $a opentun PassFd.so
+	@echo '\n======== $@ ========'
 	@-${SUDO} ifconfig tun${TUNDEV} ${TUNIP} netmask 255.255.255.0 link0
 	time TUNDEV=${TUNDEV} TUNIP=${TUNIP} RTRID=${RTRID} SUDO=${SUDO} KTRACE=${KTRACE} OSPFD=${OSPFD} perl ${PERLINC} ${PERLPATH}ospfd.pl ${PERLPATH}$a
 .endfor
