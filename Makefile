@@ -15,6 +15,7 @@ regress:
 .endif
 
 # Fill out these variables with you own system parameters
+# You need a tun device and an unused /24 IPv4 network.
 
 TUNNUM ?=		6
 TUNIP ?=		10.188.6.17
@@ -29,6 +30,16 @@ CLEANFILES +=		*.log ospfd.conf ktrace.out stamp-* opentun
 PERLHEADER !=		perl -MConfig -e 'print "$$Config{archlib}/CORE"'
 CLEANFILES +=		PassFd.c PassFd.o PassFd.so
 CFLAGS =		-Wall
+
+.MAIN: all
+
+.if make (regress) || make (all)
+.BEGIN:
+	@echo
+	[ -c /dev/tun${TUNNUM} ]
+	[ -z "${SUDO}" ] || ${SUDO} -C 3 true
+	${SUDO} ifconfig tun${TUNNUM} ${TUNIP} netmask 255.255.255.0 link0
+.endif
 
 # Set variables so that make runs with and without obj directory.
 # Only do that if necessary to keep visible output short.
@@ -47,7 +58,6 @@ PERLPATH =	${.CURDIR}/
 .for a in ${ARGS}
 run-regress-$a: $a opentun PassFd.so
 	@echo '\n======== $@ ========'
-	@-${SUDO} ifconfig tun${TUNNUM} ${TUNIP} netmask 255.255.255.0 link0
 	time TUNNUM=${TUNNUM} TUNIP=${TUNIP} RTRID=${RTRID} SUDO=${SUDO} KTRACE=${KTRACE} OSPFD=${OSPFD} perl ${PERLINC} ${PERLPATH}ospfd.pl ${PERLPATH}$a
 .endfor
 
