@@ -42,7 +42,7 @@ my $ism_rtrid;
 my $ospfd_ip;
 my $ospfd_rtrid;
 
-my $handle; 
+my $handle;
 my $check;
 my $wait;
 my $cv;
