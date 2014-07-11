@@ -6,6 +6,7 @@
 
 PERL_REQUIRE != perl -Mstrict -Mwarnings -e ' \
     eval { require AnyEvent } or print $@; \
+    eval { require Hash::Merge } or print $@; \
 '
 .if ! empty (PERL_REQUIRE)
 regress:
