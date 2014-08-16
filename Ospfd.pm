@@ -69,10 +69,10 @@ sub child {
 	my @sudo = $ENV{SUDO} ? $ENV{SUDO} : ();
 	my @ktrace = $ENV{KTRACE} ? ($ENV{KTRACE}, "-i") : ();
 	my $ospfd = $ENV{OSPFD} ? $ENV{OSPFD} : "ospfd";
-	my @cmd = (@sudo, @ktrace, $ospfd, '-d', '-v', '-f', $self->{conffile});
+	my @cmd = (@sudo, @ktrace, $ospfd, "-dv", "-f", $self->{conffile});
 	print STDERR "execute: @cmd\n";
 	exec @cmd;
-	die "Exec @cmd failed: $!";
+	die "Exec '@cmd' failed: $!";
 }
 
 1;
