@@ -27,7 +27,7 @@ sub new {
 	my $class = shift;
 	my %args = @_;
 	$args{logfile} ||= "ospfd.log";
-	$args{up} ||= "Started";
+	$args{up} ||= "startup";
 	$args{down} ||= "terminating";
 	$args{func} = sub { Carp::confess "$class func may not be called" };
 	$args{conffile} ||= "ospfd.conf";
@@ -64,19 +64,8 @@ sub new {
 	return $self;
 }
 
-sub up {
-	my $self = Proc::up(shift, @_);
-	my $timeout = shift || 10;
-	my $regex = "startup";
-	$self->loggrep(qr/$regex/, $timeout)
-	    or croak ref($self), " no $regex in $self->{logfile} ".
-		"after $timeout seconds";
-	return $self;
-}
-
 sub child {
 	my $self = shift;
-	print STDERR $self->{up}, "\n";
 	my @sudo = $ENV{SUDO} ? $ENV{SUDO} : ();
 	my @ktrace = $ENV{KTRACE} ? ($ENV{KTRACE}, "-i") : ();
 	my $ospfd = $ENV{OSPFD} ? $ENV{OSPFD} : "ospfd";
