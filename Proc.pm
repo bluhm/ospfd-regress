@@ -108,9 +108,9 @@ sub run {
 	print STDERR $self->{up}, "\n";
 	$self->{func}->($self);
 	print STDERR "Shutdown", "\n";
+
 	IO::Handle::flush(\*STDOUT);
 	IO::Handle::flush(\*STDERR);
-
 	POSIX::_exit(0);
 }
 
