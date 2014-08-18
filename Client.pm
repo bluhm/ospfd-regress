@@ -244,21 +244,22 @@ sub new {
 sub child {
     my $self = shift;
 
-    $area = $self->{area} or die "area id missing";
+    $area = $self->{area}
+	or croak ref($self), " area id missing";
     $hello_interval = $self->{hello_intervall}
-	or die "hello_interval missing";
+	or croak ref($self), " hello_interval missing";
     $ism_mac = $self->{mac_address}
-	or die "client mac address missing";
+	or croak ref($self), " client mac address missing";
     $ism_ip = $self->{ospf_address}
-	or die "client ospf address missing";
+	or croak ref($self), " client ospf address missing";
     $ism_rtrid = $self->{router_id}
-	or die "client router id missing";
+	or croak ref($self), " client router id missing";
     $tun_number =  $self->{tun_number}
-	or die "tun device number missing";
+	or croak ref($self), " tun device number missing";
     $ospfd_ip = $self->{ospfd_ip}
-	or die "ospfd ip missing";
+	or croak ref($self), " ospfd ip missing";
     $ospfd_rtrid = $self->{ospfd_rtrid}
-	or die "ospfd router id missing";
+	or croak ref($self), " ospfd router id missing";
 
     my $tun = opentun($tun_number);
 
