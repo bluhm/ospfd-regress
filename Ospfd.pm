@@ -59,7 +59,7 @@ sub new {
 	my @sudo = $ENV{SUDO} ? $ENV{SUDO} : ();
 	my @cmd = (@sudo, "/sbin/chown", "0:0", $self->{conffile});
 	system(@cmd)
-	    and die "System '@cmd' failed: $?";
+	    and die ref($self), " system '@cmd' failed: $?";
 
 	return $self;
 }
@@ -72,7 +72,7 @@ sub child {
 	my @cmd = (@sudo, @ktrace, $ospfd, "-dv", "-f", $self->{conffile});
 	print STDERR "execute: @cmd\n";
 	exec @cmd;
-	die "Exec '@cmd' failed: $!";
+	die ref($self), " exec '@cmd' failed: $!";
 }
 
 1;
