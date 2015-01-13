@@ -84,6 +84,8 @@ sub handle_ip {
 	"ospfd area is $ospf{area_id_str}: expected $area");
     if ($ospf{type} == 1) {
 	handle_hello();
+    } elsif (($ospf{type} == 2)) {
+	handle_dd();
     } else {
 	warn "ospf type is not supported: $ospf{type}";
     }
@@ -126,6 +128,11 @@ sub handle_hello {
     } else {
 	$cv->send();
     }
+}
+
+sub handle_dd {
+    my %dd = consume_dd(\$handle->{rbuf});
+    print "got dd\n";
 }
 
 my $ism_count = 0;
