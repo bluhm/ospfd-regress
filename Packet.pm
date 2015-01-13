@@ -237,7 +237,7 @@ sub consume_dd {
     my $dd = substr($$packet, 0, 8, "");
     my %fields;
     @fields{qw(interface_mtu options bits dd_sequence_number)} =
-	unpack("n C C a4", $dd);
+	unpack("n C C N", $dd);
     $fields{bits} <= 7
 	or croak "All bits except of I-, M- and MS-bit must be zero";
 
@@ -275,7 +275,7 @@ sub construct_hello {
 sub construct_dd {
     my $fields = shift;
 
-    my $packet = pack("n C C a4",
+    my $packet = pack("n C C N",
 	@$fields{qw(interface_mtu options bits dd_sequence_number)});
 
     return $packet;
