@@ -27,11 +27,13 @@ our @EXPORT = qw(
     consume_ip
     consume_ospf
     consume_hello
+    consume_dd
     construct_ether
     construct_arp
     construct_ip
     construct_ospf
     construct_hello
+    construct_dd
 );
 
 sub ip_checksum {
@@ -227,6 +229,21 @@ sub consume_hello {
     return %fields;
 }
 
+sub consume_dd {
+    my $packet = shift;
+
+    length($$packet) >= 8
+	or croak "dd packet too short: ". length($$packet);
+    my $dd = substr($$packet, 0, 8, "");
+    my %fields;
+    @fields{qw(interface_mtu options bits dd_sequence_number)} =
+	unpack("n C C a4", $dd);
+    $fields{bits} <= 7
+	or croak "All bits except of I-, M- and MS-bit must be zero";
+
+    return %fields;
+}
+
 sub construct_hello {
     my $fields = shift;
 
@@ -251,6 +268,15 @@ sub construct_hello {
     }
     my $n = @{$$fields{neighbors}};
     $packet .= pack("a4" x $n, @{$$fields{neighbors}});
+
+    return $packet;
+}
+
+sub construct_dd {
+    my $fields = shift;
+
+    my $packet = pack("n C C a4",
+	@$fields{qw(interface_mtu options bits dd_sequence_number)});
 
     return $packet;
 }
