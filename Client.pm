@@ -226,7 +226,11 @@ sub interface_state_machine {
 		network_mask_str             => "255.255.255.0",
 		hellointerval                => $hello_interval,
 		options                      => 0x02,
+		rtr_pri                      => 0,
 		routerdeadinterval           => 4 * $hello_interval,
+		designated_router_str        => "0.0.0.0",
+		backup_designated_router_str => "0.0.0.0",
+		neighbors_str                => [],
 		state2hello(%state),
 	    );
 	    $handle->push_write(
