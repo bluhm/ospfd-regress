@@ -288,7 +288,7 @@ sub send_dd {
 	options                 => 0x02,
 	bits                    => 0,
 	dd_sequence_number      => 999,	# some value
-	state2dd(%state),
+	state2dd(%$state),
     );
     $handle->push_write(
 	construct_ether(\%ether,
