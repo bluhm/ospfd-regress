@@ -126,7 +126,7 @@ sub handle_hello {
     }
     if ($reason) {
 	print "wait for hello because of: $reason\n";
-    } elsif(!$wait || $wait->{dr} || $wait->{bdr} || $wait->{nbrs}) {
+    } elsif (!$wait || $wait->{dr} || $wait->{bdr} || $wait->{nbrs}) {
 	$cv->send();
     }
 }
@@ -156,7 +156,7 @@ sub handle_dd {
     }
     if ($reason) {
 	print "wait for dd because of: $reason\n";
-    } elsif(!$wait || $wait->{dd_bits} || $wait->{dd_options}) {
+    } elsif (!$wait || $wait->{dd_bits} || $wait->{dd_options}) {
 	$cv->send();
     }
 }
@@ -236,7 +236,7 @@ sub send_dd {
 
     my %ether = (
 	src_str => $ism_mac,
-	dst_str => "01:00:5e:00:00:05",  # FIXME: Set real dst mac
+	dst_str => "01:00:5e:00:00:05",  # don't know the real dst mac
 	type    => 0x0800,               # ipv4
     );
     my %ip = (

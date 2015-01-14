@@ -18,14 +18,14 @@ our %tst_args = (
 		},
 	    },
 	    {
-		name => "Wait for dd from ospfd",
+		name => "Wait for an dd from ospfd and send one back",
 		wait => {
 		    dd_bits => 7,
 		},
 		state => {
 		    dd_bits => 7,
 		},
-		timeout => 10,  # XXX proper value
+		timeout => 10, # not specified in rfc
 	    },
 	],
     },
