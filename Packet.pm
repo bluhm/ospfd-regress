@@ -1,6 +1,7 @@
 #	$OpenBSD: Packet.pm,v 1.2 2014/07/11 22:28:51 bluhm Exp $
 
-# Copyright (c) 2014 Alexander Bluhm <bluhm@openbsd.org>
+# Copyright (c) 2014-2015 Alexander Bluhm <bluhm@openbsd.org>
+# Copyright (c) 2015 Florian Riehm <mail@friehm.de>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
