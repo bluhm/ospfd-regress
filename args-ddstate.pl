@@ -18,27 +18,14 @@ our %tst_args = (
 		},
 	    },
 	    {
-		name => "wait for neighbor 10.188.0.18 in received hello",
-		check => {
-		    dr  => "0.0.0.0",
-		    bdr => "0.0.0.0",
-		},
+		name => "Wait for dd from ospfd",
 		wait => {
-		    nbrs => [ "10.188.0.18" ],
+		    dd_bits => 7,
 		},
-		timeout => 5,  # 2 * hello interval + 1 second
-	    },
-	    {
-		name => "we are 2-way, wait for dr $ospfd_ip and ".
-		    "bdr 10.188.6.18 in received hello",
-		check => {
-		    nbrs => [ "10.188.0.18" ],
+		state => {
+		    dd_bits => 7,
 		},
-		wait => {
-		    dr  => $ospfd_ip,
-		    bdr => "10.188.6.18",
-		},
-		timeout => 11,  # dead interval + hello interval + 1 second
+		timeout => 10,  # XXX proper value
 	    },
 	],
     },
