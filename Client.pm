@@ -241,6 +241,13 @@ sub interface_state_machine {
     return \%state;
 }
 
+sub state2dd {
+    return statemapper({
+	dd_bits         => "bits",
+	dd_options      => "designated_router_str",
+    }, @_);
+}
+
 sub send_dd {
     my $state = shift;
     my $ip_number = unpack("N", pack("C4", split(/\./, $ism_ip)));
@@ -273,10 +280,11 @@ sub send_dd {
 	autype        => 0,           # no authentication
     );
     my %dd = (
-	interface_mtu => 1500,
-	options => 0x02,
-	bits => $state->{dd_bits},
-	dd_sequence_number => 999,	# some value
+	interface_mtu           => 1500,
+	options                 => 0x02,
+	bits                    => 0,
+	dd_sequence_number      => 999,	# some value
+	state2dd(%state),
     );
     $handle->push_write(
 	construct_ether(\%ether,
