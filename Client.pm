@@ -136,11 +136,11 @@ sub handle_dd {
 
     my $compare = sub {
 	my $expect = shift;
-	foreach my $key (qw/options bits/) {
+	foreach my $key (qw(options bits)) {
 	    if ($expect->{"dd_$key"}) {
 		$dd{$key} == $expect->{"dd_$key"} or
 		    return sprintf("dd key '%s' is 0x%x: expected 0x%x\n",
-		    $key, $dd{$key}, $expect->{"dd_$key"});
+			$key, $dd{$key}, $expect->{"dd_$key"});
 	    }
 	}
 	return "";
