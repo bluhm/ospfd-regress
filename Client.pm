@@ -161,6 +161,24 @@ sub handle_dd {
     }
 }
 
+sub statemapper {
+    my ($map, %state) = @_;
+    my %packet;
+    while (my($k, $v) = each %state) {
+	$packet{$map->{$k}} = $v;
+    }
+    return %packet;
+}
+
+sub state2hello {
+    return statemapper({
+	pri     => "rtr_pri",
+	dr      => "designated_router_str",
+	bdr     => "backup_designated_router_str",
+	nbrs    => "neighbors_str",
+    }, @_);
+}
+
 my $ism_count = 0;
 sub interface_state_machine {
     my %state = (
@@ -208,11 +226,8 @@ sub interface_state_machine {
 		network_mask_str             => "255.255.255.0",
 		hellointerval                => $hello_interval,
 		options                      => 0x02,
-		rtr_pri		             => $state{pri},
 		routerdeadinterval           => 4 * $hello_interval,
-		designated_router_str        => $state{dr},
-		backup_designated_router_str => $state{bdr},
-		neighbors_str                => $state{nbrs},
+		state2hello(%state),
 	    );
 	    $handle->push_write(
 		construct_ether(\%ether,
