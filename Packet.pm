@@ -29,6 +29,7 @@ our @EXPORT = qw(
     consume_ospf
     consume_hello
     consume_dd
+    consume_lsa
     construct_ether
     construct_arp
     construct_ip
@@ -241,6 +242,24 @@ sub consume_dd {
 	unpack("n C C N", $dd);
     $fields{bits} <= 7
 	or croak "All bits except of I-, M- and MS-bit must be zero";
+
+    return %fields;
+}
+
+sub consume_lsa {
+    my $packet = shift;
+
+    length($$packet) >= 20
+	or croak "lsa packet too short: ". length($$packet);
+    my $dd = substr($$packet, 0, 20, "");
+    my %fields;
+    @fields{qw(ls_age options ls_type link_state_id advertising_router
+	ls_sequence_number ls_checksum length)} =
+	unpack("n C C a4 a4 N n n", $dd);
+
+    foreach my $addr (qw(link_state_id advertising_router)) {
+	$fields{"${addr}_str"} = join(".", unpack("C4", $fields{$addr}));
+    }
 
     return %fields;
 }
