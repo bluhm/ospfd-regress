@@ -36,6 +36,7 @@ our @EXPORT = qw(
     construct_ospf
     construct_hello
     construct_dd
+    construct_lsa
 );
 
 sub ip_checksum {
@@ -294,9 +295,26 @@ sub construct_hello {
 
 sub construct_dd {
     my $fields = shift;
+    my $subpacket = shift // "";
 
     my $packet = pack("n C C N",
 	@$fields{qw(interface_mtu options bits dd_sequence_number)});
+
+    return $packet. $subpacket;
+}
+
+# XXX ls_checksum isn't generated automatically.
+sub construct_lsa {
+    my $fields = shift;
+
+    foreach my $addr (qw(link_state_id advertising_router)) {
+	if ($$fields{"${addr}_str"}) {
+	    $$fields{$addr} = pack("C4", split(/\./, $$fields{"${addr}_str"}));
+	}
+    }
+    my $packet = pack("n C C a4 a4 N n n",
+	@$fields{qw(ls_age options ls_type link_state_id advertising_router
+	ls_sequence_number ls_checksum length)});
 
     return $packet;
 }
