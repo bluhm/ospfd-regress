@@ -18,12 +18,21 @@ our %tst_args = (
 		},
 	    },
 	    {
-		name => "Wait for an dd from ospfd and send one back",
+		name => "neighbor asserting itself as master. " .
+		    "We proclaim to be master, because of higher router id.",
 		wait => {
-		    dd_bits => 7,
+		    dd_bits => 7, # I|M|MS
 		},
 		state => {
 		    dd_bits => 7,
+		},
+		timeout => 10, # not specified in rfc
+	    },
+	    {
+		name => "check if neighbor is slave now and initialization is ".
+		    "done",
+		wait => {
+		    dd_bits => 0x2, # M
 		},
 		timeout => 10, # not specified in rfc
 	    },
