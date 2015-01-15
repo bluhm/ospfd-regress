@@ -143,6 +143,11 @@ sub handle_dd {
 			$key, $dd{$key}, $expect->{"dd_$key"});
 	    }
 	}
+	if ($expect->{dd_seq}) {
+	    $dd{dd_sequence_number} == $expect->{dd_seq} or
+		return sprintf("dd_sequence_number is 0x%x: expected 0x%x\n",
+		    $dd{dd_sequence_number}, $expect->{dd_seq});
+	}
 	return "";
     };
 
@@ -156,7 +161,8 @@ sub handle_dd {
     }
     if ($reason) {
 	print "wait for dd because of: $reason\n";
-    } elsif (!$wait || $wait->{dd_bits} || $wait->{dd_options}) {
+    } elsif (!$wait || $wait->{dd_bits} || $wait->{dd_options} ||
+	$wait->{dd_seq}) {
 	$cv->send();
     }
 }

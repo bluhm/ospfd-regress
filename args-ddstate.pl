@@ -29,10 +29,11 @@ our %tst_args = (
 		timeout => 10, # not specified in rfc
 	    },
 	    {
-		name => "check if neighbor is slave now and initialization is ".
-		    "done",
+		name => "check if neighbor is slave, initialization is done ".
+		    "and neighbour has applied our dd sequence number.",
 		wait => {
 		    dd_bits => 0x2, # M
+		    dd_seq => 999,
 		},
 		timeout => 10, # not specified in rfc
 	    },
