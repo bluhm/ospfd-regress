@@ -17,7 +17,7 @@
 
 use strict;
 use warnings;
-use Tun 'opentap';
+use Tap 'opentap';
 
 my $tap = opentap(6)
     or die "Open tap device 6 failed: $!";

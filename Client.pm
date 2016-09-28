@@ -32,7 +32,7 @@ use AnyEvent::Handle;
 use AnyEvent::Strict;
 
 use Packet;
-use Tun 'opentap';
+use Tap 'opentap';
 
 my $tap_number;
 my $area;

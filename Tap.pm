@@ -19,7 +19,7 @@
 use strict;
 use warnings;
 
-package Tun;
+package Tap;
 use parent 'Exporter';
 our @EXPORT_OK = qw(opentap);
 
