@@ -43,7 +43,7 @@ CFLAGS =		-Wall
 .BEGIN:
 	@echo
 	[ -c /dev/tun${TUNNUM} ]
-	[ -z "${SUDO}" ] || ${SUDO} -C 3 true
+	[ -z "${SUDO}" ] || ${SUDO} -C 4 true
 	${SUDO} ifconfig tun${TUNNUM} ${TUNIP} netmask 255.255.255.0 link0
 .endif
 
