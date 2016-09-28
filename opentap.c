@@ -1,4 +1,4 @@
-/*	$OpenBSD: opentun.c,v 1.2 2014/07/11 22:28:51 bluhm Exp $ */
+/*	$OpenBSD: opentap.c,v 1.1 2016/09/28 12:40:35 bluhm Exp $ */
 
 /*
  * Copyright (c) 2014 Alexander Bluhm <bluhm@openbsd.org>
