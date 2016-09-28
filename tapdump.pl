@@ -17,13 +17,13 @@
 
 use strict;
 use warnings;
-use Tun 'opentun';
+use Tun 'opentap';
 
-my $tun = opentun(6)
-    or die "Open tun device 6 failed: $!";
+my $tap = opentap(6)
+    or die "Open tap device 6 failed: $!";
 
 for (;;) {
-    my $n = sysread($tun, my $buf, 70000);
+    my $n = sysread($tap, my $buf, 70000);
     defined($n) or die "sysread failed: $!";
     $n or last;
     print "Read $n bytes\n";
