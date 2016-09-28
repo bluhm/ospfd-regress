@@ -31,8 +31,8 @@ our @EXPORT = qw(
 );
 
 our $area = "10.188.0.0";
-our $tun_number = $ENV{TUNNUM};
-our $ospfd_ip = $ENV{TUNIP};
+our $tun_number = $ENV{TAPNUM};
+our $ospfd_ip = $ENV{TAPIP};
 our $ospfd_rtrid = $ENV{RTRID};
 
 my $hello_interval = 2;
