@@ -24,14 +24,14 @@ our @ISA = qw( Exporter );
 
 our @EXPORT = qw(
     $area
-    $tun_number
+    $tap_number
     $ospfd_ip
     $ospfd_rtrid
     %default_args
 );
 
 our $area = "10.188.0.0";
-our $tun_number = $ENV{TAPNUM};
+our $tap_number = $ENV{TAPNUM};
 our $ospfd_ip = $ENV{TAPIP};
 our $ospfd_rtrid = $ENV{RTRID};
 
@@ -45,7 +45,7 @@ our %default_args = (
 	    },
 	    areas => {
 		$area => {
-		    "tun$tun_number:$ospfd_ip" => {
+		    "tap$tap_number:$ospfd_ip" => {
 			'metric' => '15',
 			'hello-interval' => $hello_interval,
 			'router-dead-time' => 4 * $hello_interval,
@@ -61,7 +61,7 @@ our %default_args = (
 	router_id => "10.188.0.18",
 	area => $area,
 	hello_intervall => $hello_interval,
-	tun_number => $tun_number,
+	tap_number => $tap_number,
 	ospfd_ip => $ospfd_ip,
 	ospfd_rtrid => $ospfd_rtrid,
     },
