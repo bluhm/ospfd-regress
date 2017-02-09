@@ -93,7 +93,8 @@ stamp-passfd: PassFd.so
 
 .xs.so:
 	xsubpp -prototypes $> >${@:S/.so$/.c/}
-	gcc -shared -Wall -I${PERLHEADER} -o $@ ${@:S/.so$/.c/}
+	gcc -shared -Wall -DNO_LOCALE_NUMERIC -DNO_LOCALE_COLLATE\
+	    -I${PERLHEADER} -o $@ ${@:S/.so$/.c/}
 	perl ${PERLINC} -M${@:R} -e ''
 
 .include <bsd.regress.mk>
