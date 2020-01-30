@@ -1,4 +1,4 @@
-#	$OpenBSD: Makefile,v 1.11 2019/07/12 19:31:29 bluhm Exp $
+#	$OpenBSD: Makefile,v 1.12 2020/01/30 13:03:46 bluhm Exp $
 
 # The following ports must be installed for the regression tests:
 # p5-AnyEvent		provide framework for multiple event loops
