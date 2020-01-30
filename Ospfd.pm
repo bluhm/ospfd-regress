@@ -67,7 +67,8 @@ sub new {
 sub child {
 	my $self = shift;
 	my @sudo = $ENV{SUDO} ? $ENV{SUDO} : ();
-	my @ktrace = $ENV{KTRACE} ? ($ENV{KTRACE}, "-i") : ();
+	my @ktrace = $ENV{KTRACE} || ();
+	push @ktrace, "-i", "-f", "ospfd.ktrace" if @ktrace;
 	my $ospfd = $ENV{OSPFD} ? $ENV{OSPFD} : "ospfd";
 	my @cmd = (@sudo, @ktrace, $ospfd, "-dv", "-f", $self->{conffile});
 	print STDERR "execute: @cmd\n";
